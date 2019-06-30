@@ -2,5 +2,7 @@
 
 int main() {
 
-  return 0;
+    std::cout << "fbuf" << std::endl;
+
+    return 0;
 }
