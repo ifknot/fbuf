@@ -7,7 +7,17 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
+#define CATCH_CONFIG_RUNNER
+#include "tests/catch2.h"
 
+int main( int argc, char* argv[] ) {
+
+    // https://github.com/ifknot/Catch2
+    return Catch::Session().run( argc, argv );
+
+}
+
+/*
 int main(int argc, char* argv[]) {
     int fbfd = 0; // framebuffer filedescriptor
     struct fb_var_screeninfo var_info;
@@ -34,3 +44,4 @@ int main(int argc, char* argv[]) {
     return 0;
 
 }
+*/
