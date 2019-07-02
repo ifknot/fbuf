@@ -9,4 +9,4 @@ add_executable(fbuf
         tests/catch2.h
         LICENSE
         main.cpp
-        README.md)
+        README.md frame_buffer.cpp frame_buffer.h)
