@@ -16,6 +16,7 @@ int main( int argc, char* argv[] ) {
 #include <linux/fb.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <sys/kd.h>
 #include <string.h>
 
 int main(int argc, char* argv[])
@@ -49,6 +50,9 @@ int main(int argc, char* argv[])
     // map framebuffer to user memory
     screensize = finfo.smem_len;
 
+    int tty_fd = open("/dev/tty0", O_RDWR);
+    ioctl(tty_fd,KDSETMODE,KD_GRAPHICS);
+
     fbp = (char*)mmap(0,
                       screensize,
                       PROT_READ | PROT_WRITE,
@@ -69,5 +73,7 @@ int main(int argc, char* argv[])
     // cleanup
     munmap(fbp, screensize);
     close(fbfd);
+
+    ioctl(tty_fd,KDSETMODE,KD_TEXT);
     return 0;
 }
