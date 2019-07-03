@@ -7,7 +7,10 @@ namespace linux_util {
     bool frame_buffer::open_buffer() {
         fbfd = open(device_path.c_str(), O_RDWR);
         if(fbfd != -1) {
-            ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo);
+            ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // acquire variable info
+            vinfo.grayscale=0; // ensure colour
+            vinfo.bits_per_pixel=32; // enable 16777216 colours + transparency
+            ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo);
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             size_ = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;//vinfo.yres_virtual * finfo.line_length;
 
