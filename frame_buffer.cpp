@@ -38,7 +38,7 @@ namespace linux_util {
         return vinfo.bits_per_pixel;
     }
 
-    uint32_t frame_buffer::rgb(uint8_t r, uint8_t g, uint8_t b) {
+    uint16_t frame_buffer::rgb(uint8_t r, uint8_t g, uint8_t b) {
         return (r << vinfo.red.offset) | (g << vinfo.green.offset) | (b << vinfo.blue.offset);
     }
 
@@ -46,7 +46,7 @@ namespace linux_util {
         for (int x = 0; x < vinfo.xres; x++) {
             for (int y = 0; y < vinfo.yres; y++) {
                 long location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel / 8) + (y + vinfo.yoffset) * finfo.line_length;
-                *((uint32_t *) (fbmap + location)) = rgb(0xFF, 0x00, 0xFF);
+                *((uint16_t *) (fbmap + location)) = rgb(0xFF, 0x00, 0xFF);
             }
         }
     }
