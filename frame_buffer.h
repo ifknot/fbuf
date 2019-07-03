@@ -12,19 +12,28 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
+#include <string>
+#include <stdexcept>
+
 namespace linux_util {
+
+    static const std::string FRAME_BUFFER_PATH = "/dev/fb0";
 
     class frame_buffer {
 
     public:
 
-        int open();
+        frame_buffer(const std::string& device_path);
 
+        int open_buffer();
 
+        //int close_buffer();
 
-        void screensize();
+        //size_t screensize();
 
     private:
+
+        std::string device_path;
 
         int fbfd; //framebuffer filedescriptor
 
