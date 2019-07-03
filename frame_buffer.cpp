@@ -13,6 +13,8 @@ namespace linux_util {
 
             fbmap = static_cast<uint8_t*>(mmap(0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
 
+
+
             return true;
         } else {
             throw std::invalid_argument(strerror(errno));
