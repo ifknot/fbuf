@@ -80,6 +80,8 @@ int main()
             }
 
         }
+
+    usleep(1000000);
     munmap(fbp, screensize);
     close(fbfd);
     return 0;
