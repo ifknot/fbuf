@@ -17,7 +17,7 @@
 
 namespace linux_util {
 
-    static const std::string FRAME_BUFFER_PATH = "/dev/fb0";
+    static const std::string FRAME_BUFFER_PATH = "/dev/fb1";
 
     class frame_buffer {
 
