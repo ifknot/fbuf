@@ -23,33 +23,49 @@ namespace linux_util {
 
     public:
 
-        frame_buffer(const std::string& device_path);
+        frame_buffer(const std::string device_path = FRAME_BUFFER_PATH);
 
-        int open_buffer();
+        bool open_buffer();
 
-        //int close_buffer();
+        bool close_buffer();
 
-        //size_t screensize();
+        size_t size();
+
+        std::pair<int, int> dimensions();
+
+        size_t bits_per_pixel();
+
+        uint32_t rgb(uint8_t r, uint8_t g, uint8_t b);
+
+        void clear(uint32_t colour = 0xFFFFFFFF);
 
     private:
 
         std::string device_path;
 
-        int fbfd; //framebuffer filedescriptor
+        int fbfd{-1}; //frame buffer file descriptor
 
         /**
          * Used to describe the features of a video card that are _user_ defined.
          * With ```fb_var_screeninfo``` such as depth and the resolution can be defined.
          */
-        struct fb_var_screeninfo variable_info;
+        struct fb_var_screeninfo vinfo;
 
         /**
          *  Defines the _fixed_ properties of a video card that are created when a mode is set.
          *  E.g. the start of the frame buffer memory - the address of the frame buffer memory cannot be changed or moved.
          */
-        struct fb_fix_screeninfo fixed_info;
+        struct fb_fix_screeninfo finfo;
 
-        size_t screensize_;
+        /**
+         * frame buffer size (bytes)
+         */
+        size_t size_{0};
+
+        /**
+         * frame buffer memory map
+         */
+         uint8_t* fbmap;
 
     };
 
