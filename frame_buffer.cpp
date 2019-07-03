@@ -9,7 +9,7 @@ namespace linux_util {
         if(fbfd != -1) {
             ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo);
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
-            size_ = vinfo.yres_virtual * finfo.line_length;
+            size_ = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;//vinfo.yres_virtual * finfo.line_length;
 
             fbmap = static_cast<uint8_t*>(mmap(0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
 
@@ -20,6 +20,7 @@ namespace linux_util {
     }
 
     bool frame_buffer::close_buffer() {
+        munmap(fbmap, size_);
         if(close(fbfd) == 0)
             return true;
         else
