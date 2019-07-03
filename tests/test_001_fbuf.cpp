@@ -25,7 +25,6 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
 
                     std::cout << width << " x " << height << " (" << fb.size() << " bytes) " << fb.bits_per_pixel() << " bits per pixel\n";
                     fb.clear();
-                    usleep(1000000);
             }
 
             WHEN("it is closed")
