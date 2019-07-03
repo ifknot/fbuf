@@ -1,4 +1,4 @@
-/*
+
 #include "catch2.h"
 
 #include "../frame_buffer.h"
@@ -48,4 +48,4 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
     }
 
 }
-*/
+

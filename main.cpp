@@ -1,4 +1,4 @@
-/*
+
 #define CATCH_CONFIG_RUNNER
 #include "tests/catch2.h"
 
@@ -8,7 +8,8 @@ int main( int argc, char* argv[] ) {
     return Catch::Session().run( argc, argv );
 
 }
-*/
+
+/*
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -77,3 +78,4 @@ int main(int argc, char* argv[])
     ioctl(tty_fd,KDSETMODE,KD_TEXT);
     return 0;
 }
+*/
