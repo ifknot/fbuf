@@ -35,7 +35,7 @@ namespace linux_util {
 
         size_t bits_per_pixel();
 
-        uint16_t rgb(uint8_t r, uint8_t g, uint8_t b);
+        uint32_t rgb(uint8_t r, uint8_t g, uint8_t b);
 
         void clear(uint32_t colour = 0xFFFFFFFF);
 
