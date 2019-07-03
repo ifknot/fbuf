@@ -23,7 +23,7 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
                     auto[width, height] = fb.dimensions();
 
                     std::cout << width << " x " << height << " (" << fb.size() << " bytes) " << fb.bits_per_pixel() << " bits per pixel\n";
-                    fb.close_buffer();
+                    fb.clear();
                     usleep(1000000);
             }
 
