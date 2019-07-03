@@ -11,6 +11,7 @@ namespace linux_util {
             vinfo.grayscale=0; // ensure colour
             vinfo.bits_per_pixel=32; // enable 16777216 colours + transparency
             ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo);
+            ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // re-acquire variable info
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             size_ = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;//vinfo.yres_virtual * finfo.line_length;
 
