@@ -64,6 +64,8 @@ int main(int argc, char* argv[])
         memset(fbp + screensize/2, 0x18, screensize/2);
 
 
+        usleep(1000000);
+
     // cleanup
     munmap(fbp, screensize);
     close(fbfd);
