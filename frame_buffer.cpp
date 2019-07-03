@@ -11,7 +11,7 @@ namespace linux_util {
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             size_ = vinfo.yres_virtual * finfo.line_length;
 
-            fbmap = static_cast<uint8_t*>(mmap(0, size(), PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
+            fbmap = static_cast<uint8_t*>(mmap(0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
 
             return true;
         } else {
