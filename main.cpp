@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     char *fbp = 0;
 
     // Open the file for reading and writing
-    fbfd = open("/dev/fb0", O_RDWR);
+    fbfd = open("/dev/fb1", O_RDWR);
     if (!fbfd) {
         printf("Error: cannot open framebuffer device.\n");
         return(1);
