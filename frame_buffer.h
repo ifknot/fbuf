@@ -16,7 +16,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#define NDEBUG
 
 namespace linux_util {
 
@@ -33,8 +32,6 @@ namespace linux_util {
 
         size_t size();
 
-        std::pair<int, int> dimensions();
-
         pixel_t rgb(uint8_t r, uint8_t g, uint8_t b);
 
         void pixel(uint x, uint y, pixel_t colour);
@@ -43,9 +40,9 @@ namespace linux_util {
 
         ~frame_buffer();
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
         std::string info();
-#endif
+//#endif
 
 #ifdef NDEBUG
     private:

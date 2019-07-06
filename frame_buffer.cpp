@@ -37,10 +37,6 @@ namespace linux_util {
         return size_;
     }
 
-    std::pair<int, int> frame_buffer::dimensions() {
-        return std::make_pair<int, int>(vinfo.xres, vinfo.yres);
-    }
-
     frame_buffer::pixel_t frame_buffer::rgb(uint8_t r, uint8_t g, uint8_t b) {
         return (r << vinfo.red.offset) | (g << vinfo.green.offset) | (b << vinfo.blue.offset);
     }
@@ -65,7 +61,7 @@ namespace linux_util {
 #endif
     }
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
 
     std::string frame_buffer::info() {
         std::stringstream ss;
@@ -85,6 +81,6 @@ namespace linux_util {
         return ss.str();
     }
 
-#endif
+//#endif
 
 }

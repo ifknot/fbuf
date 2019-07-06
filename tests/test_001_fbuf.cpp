@@ -33,10 +33,6 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
 
 #endif
 
-        fb.clear();
-
-        //std::cout << fb.info() << std::endl;
-
     }
 
 #ifndef NDEBUG
