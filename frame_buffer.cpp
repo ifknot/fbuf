@@ -53,7 +53,8 @@ namespace linux_util {
     void frame_buffer::clear(pixel_t colour) {
         for (u_int32_t x = 0; x < vinfo.xres; x++) {
             for (uint32_t y = 0; y < vinfo.yres; y++) {
-                pixel(x, y, colour);
+                uint32_t location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel / 8) + (y + vinfo.yoffset) * finfo.line_length;
+                *((uint32_t *) (fbmap + location)) = rgb(0xFF, 0x00, 0x00);
             }
         }
     }
