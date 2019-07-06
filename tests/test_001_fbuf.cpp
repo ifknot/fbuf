@@ -13,6 +13,8 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
 
         fbuf_t fb;
 
+#ifndef NDEBUG
+
         WHEN("it is opened")
             THEN("valid file descriptor returned") REQUIRE(fb.open_buffer());
 
@@ -21,15 +23,15 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
             WHEN("buffer size query")
                 THEN("valid size returned") {
                     REQUIRE(fb.size() != 0);
-                    auto[width, height] = fb.dimensions();
 
-                    std::cout << width << " x " << height << " (" << fb.size() << " bytes) " << fb.bits_per_pixel() << " bits per pixel\n";
-                    fb.clear();
+                    std::cout << fb.info() << std::endl;
             }
 
             WHEN("it is closed")
                 THEN("success is returned") REQUIRE(fb.close_buffer());
         }
+
+#endif
 
     }
 

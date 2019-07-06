@@ -13,33 +13,43 @@
 #include <sys/ioctl.h>
 
 #include <string>
+#include <sstream>
 #include <stdexcept>
 
 namespace linux_util {
 
-    static const std::string FRAME_BUFFER_PATH = "/dev/fb1";
+    static const std::string FRAME_BUFFER_PATH = "/dev/fb1"; //Raspbian RPi 3.5" LCD on 2nd frame buffer
+    static const int DEFAULT_BPB = 16; //RPi 3.5" LCD 16 bits per pixel 65536 colours XGA "High Color"
 
     class frame_buffer {
 
     public:
 
+        using pixel_t = uint16_t; //RPi 3.5" LCD 16 bits per pixel
+
         frame_buffer(const std::string device_path = FRAME_BUFFER_PATH);
-
-        bool open_buffer();
-
-        bool close_buffer();
 
         size_t size();
 
         std::pair<int, int> dimensions();
 
-        size_t bits_per_pixel();
+        pixel_t rgb(uint8_t r, uint8_t g, uint8_t b);
 
-        uint32_t rgb(uint8_t r, uint8_t g, uint8_t b);
+        void clear(pixel_t colour = 0u);
 
-        void clear(uint32_t colour = 0xFFFFFFFF);
+        ~frame_buffer();
 
+#ifndef NDEBUG
+        std::string info();
+#endif
+
+#ifdef NDEBUG
     private:
+#endif
+
+        bool open_buffer();
+
+        bool close_buffer();
 
         std::string device_path;
 
