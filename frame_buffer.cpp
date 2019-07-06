@@ -71,6 +71,7 @@ namespace linux_util {
         std::stringstream ss;
         ss  << "xres\t\t" << vinfo.xres
             << "\nyres\t\t" << vinfo.yres
+            << "memory\t\t" << size_ << " bytes"
             << "\nxres_virtual\t" << vinfo.xres_virtual
             << "\nyres_virtual\t" << vinfo.yres_virtual
             << "\nxoffset\t\t" << vinfo.xoffset
