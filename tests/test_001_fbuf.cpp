@@ -35,6 +35,8 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
 
     }
 
+#ifndef NDEBUG
+
     GIVEN("a frame_buffer invalid device path") {
 
         fbuf_t fb{"/dev/"};
@@ -47,6 +49,7 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
             THEN("an invalid_argument exception is thrown") CHECK_THROWS_AS(fb.open_buffer(), std::invalid_argument);
 
     }
+#endif
 
 }
 

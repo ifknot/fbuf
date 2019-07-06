@@ -16,6 +16,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#define NDEBUG
+
 namespace linux_util {
 
     static const std::string FRAME_BUFFER_PATH = "/dev/fb1"; //Raspbian RPi 3.5" LCD on 2nd frame buffer

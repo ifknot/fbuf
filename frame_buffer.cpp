@@ -2,7 +2,11 @@
 
 namespace linux_util {
 
-    frame_buffer::frame_buffer(const std::string device_path): device_path(device_path) {}
+    frame_buffer::frame_buffer(const std::string device_path): device_path(device_path) {
+#ifdef NDEBUG
+        open_buffer();
+#endif
+    }
 
     bool frame_buffer::open_buffer() {
         fbfd = open(device_path.c_str(), O_RDWR);
@@ -51,7 +55,9 @@ namespace linux_util {
     }
 
     frame_buffer::~frame_buffer() {
-
+#ifdef NDEBUG
+        close_buffer();
+#endif
     }
 
 
@@ -68,10 +74,10 @@ namespace linux_util {
             << "\nyoffset\t\t" << vinfo.yoffset
             << "\nbits_per_pixel\t" << vinfo.bits_per_pixel
             << "\ngrayscale\t" << vinfo.grayscale
-            << "\nnonstd\t" << vinfo.nonstd
+            << "\nnonstd\t\t" << vinfo.nonstd
             << "\nactivate\t" << vinfo.activate
-            << "\nheight\t" << vinfo.height << "mm"
-            << "\nwidth\t" << vinfo.width << "mm\n";
+            << "\nheight\t\t" << vinfo.height << "mm"
+            << "\nwidth\t\t" << vinfo.width << "mm\n";
         return ss.str();
     }
 
