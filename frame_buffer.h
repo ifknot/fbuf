@@ -36,6 +36,8 @@ namespace linux_util {
 
         pixel_t rgb(uint8_t r, uint8_t g, uint8_t b);
 
+        void pixel(uint x, uint y, pixel_t colour);
+
         void clear(pixel_t colour = 0u);
 
         ~frame_buffer();
