@@ -33,6 +33,8 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
 
 #endif
 
+        fb.clear();
+
     }
 
 #ifndef NDEBUG
