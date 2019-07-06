@@ -16,7 +16,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#define NDEBUG
 
 namespace linux_util {
 
