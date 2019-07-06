@@ -35,7 +35,7 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
 
         fb.clear();
 
-        std::cout << fb.info() << std::endl;
+        //std::cout << fb.info() << std::endl;
 
     }
 
