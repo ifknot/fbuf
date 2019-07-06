@@ -49,8 +49,7 @@ namespace linux_util {
     void frame_buffer::clear(pixel_t colour) {
         for (u_int32_t x = 0; x < vinfo.xres; x++) {
             for (uint32_t y = 0; y < vinfo.yres; y++) {
-                uint32_t location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel / 8) + (y + vinfo.yoffset) * finfo.line_length;
-                *((uint32_t *) (fbmap + location)) = rgb(0xF, 0x00, 0x00);
+                pixel(x, y, colour);
             }
         }
     }
@@ -61,7 +60,7 @@ namespace linux_util {
 #endif
     }
 
-//#ifndef NDEBUG
+#ifndef NDEBUG
 
     std::string frame_buffer::info() {
         std::stringstream ss;
@@ -81,6 +80,6 @@ namespace linux_util {
         return ss.str();
     }
 
-//#endif
+#endif
 
 }

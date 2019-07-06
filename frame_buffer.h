@@ -40,9 +40,9 @@ namespace linux_util {
 
         ~frame_buffer();
 
-//#ifndef NDEBUG
+#ifndef NDEBUG
         std::string info();
-//#endif
+#endif
 
 #ifdef NDEBUG
     private:
