@@ -47,14 +47,14 @@ namespace linux_util {
 
     void frame_buffer::clear() {
         for(uint32_t i{0}; i < size_ ; ++i) {
-            *((uint32_t *) (fbmap + i + vinfo.xoffset)) = 0u;
+            *((uint32_t *) (fbmap + ((i + vinfo.xoffset) << 1))) = 0u;
         }
     }
 
 
     void frame_buffer::fill(frame_buffer::pixel_t colour) {
         for(uint32_t i{0}; i < size_ ; ++i) {
-            *((uint32_t *) (fbmap + i + vinfo.xoffset)) = colour;
+            *((uint32_t *) (fbmap + ((i + vinfo.xoffset) << 1))) = colour;
         }
     }
 
