@@ -20,6 +20,7 @@ namespace linux_util {
             size_ = vinfo.yres_virtual * finfo.line_length;
             fbmap = static_cast<uint8_t*>(mmap(0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
             vbmap = fbmap + size_;
+            yoffset = vinfo.yoffset;
             return true;
         } else {
             throw std::invalid_argument(strerror(errno));
@@ -43,26 +44,26 @@ namespace linux_util {
     }
 
     void frame_buffer::pixel(uint32_t x, uint32_t y, pixel_t colour) {
-        *((uint32_t *) (vbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
+        *((uint32_t *) (vbmap + ((x + vinfo.xoffset) << 1) + (y + yoffset) * finfo.line_length)) = colour;
     }
 
     void frame_buffer::clear() {
         for(uint32_t i{0}; i < size_ ; i += 2) {
-            *((uint32_t *) (vbmap + ((i + vinfo.xoffset) << 1))) = 0u;
+            *((uint32_t *) (vbmap + yoffset + ((i + vinfo.xoffset) << 1))) = 0u;
         }
     }
 
     void frame_buffer::fill(frame_buffer::pixel_t colour) {
         for(uint32_t i{0}; i < size_ ; i += 2) {
-            *((uint32_t *) (vbmap + ((i + vinfo.xoffset) << 1))) = colour;
+            *((uint32_t *) (vbmap + yoffset + ((i + vinfo.xoffset) << 1))) = colour;
         }
     }
 
     void frame_buffer::swap() {
-        if (vinfo.yoffset==0)
-            vinfo.yoffset = size_;
+        if (yoffset==0)
+            yoffset = size_;
         else
-            vinfo.yoffset=0;
+            yoffset=0;
 
         //"Pan" to the back buffer
         ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
