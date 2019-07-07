@@ -24,9 +24,11 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
                 THEN("valid size returned") {
                     REQUIRE(fb.size() != 0);
                     for(uint32_t x = 0; x < fb.vinfo.yres; ++x) {
-                        fb.pixel(x, x, fb.rgb(0xf,0,0));
-                        usleep(10000);
-                        fb.fill(fb.rgb(0xFF,0xFF,0xFF));
+                        fb.pixel(x, x, fb.rgb(0xFF,0,0));
+                        usleep(5000);
+                        fb.fill(fb.rgb(0xFA,0xFA,0xFA));
+                        usleep(5000);
+                        fb.clear();
                     }
                     std::cout << fb.info() << std::endl;
             }
