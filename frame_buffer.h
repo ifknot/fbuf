@@ -30,7 +30,7 @@ namespace linux_util {
 
         frame_buffer(const std::string device_path = FRAME_BUFFER_PATH);
 
-        size_t size();
+        uint32_t size();
 
         pixel_t rgb(uint8_t r, uint8_t g, uint8_t b);
 
@@ -71,7 +71,7 @@ namespace linux_util {
         /**
          * frame buffer size (bytes)
          */
-        size_t size_{0};
+        uint32_t size_{0};
 
         /**
          * frame buffer memory map

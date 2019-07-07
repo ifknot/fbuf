@@ -33,7 +33,7 @@ namespace linux_util {
             throw std::invalid_argument(strerror(errno));
     }
 
-    size_t frame_buffer::size() {
+    uint32_t frame_buffer::size() {
         return size_;
     }
 
@@ -46,7 +46,7 @@ namespace linux_util {
     }
 
     void frame_buffer::clear() {
-        for(uint32_t i; i < size_ ; ++i) {
+        for(uint32_t i{0}; i < size_ ; ++i) {
             *((uint32_t *) (fbmap + i + vinfo.xoffset)) = 0u;
         }
     }
