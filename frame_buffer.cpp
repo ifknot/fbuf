@@ -60,19 +60,10 @@ namespace linux_util {
     }
 
     void frame_buffer::swap() {
-        if (yoffset==0)
-            yoffset = size_;
-        else
-            yoffset=0;
-
-        //"Pan" to the back buffer
+        vinfo.yoffset = (vinfo.yoffset == 0u) ?size_ :0u;
+        ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo);
         ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
 
-        //Update the pointer to the back buffer so we don't draw on the front buffer
-        uint8_t* tmp;
-        tmp=fbmap;
-        fbmap=vbmap;
-        vbmap=tmp;
     }
 
     frame_buffer::~frame_buffer() {
