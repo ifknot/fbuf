@@ -86,8 +86,6 @@ namespace linux_util {
           * virtual frame buffer
           */
          uint8_t * vbmap;
-
-         uint32_t yoffset;
     };
 
 }
