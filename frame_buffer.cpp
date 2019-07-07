@@ -43,8 +43,8 @@ namespace linux_util {
 
     void frame_buffer::pixel(uint32_t x, uint32_t y, pixel_t colour) {
         //uint32_t offset = (x + vinfo.xoffset) * (vinfo.bits_per_pixel / 8) + (y + vinfo.yoffset) * finfo.line_length;
-        uint32_t offset = ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length;
-        *((uint32_t *) (fbmap + offset)) = colour;
+        //uint32_t offset = ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length;
+        *((uint32_t *) (fbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
     }
 
     void frame_buffer::clear(pixel_t colour) {
