@@ -36,7 +36,7 @@ namespace linux_util {
 
         void pixel(uint x, uint y, pixel_t colour);
 
-        void clear(pixel_t colour = 0u);
+        void clear();
 
         ~frame_buffer();
 
