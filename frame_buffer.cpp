@@ -51,6 +51,13 @@ namespace linux_util {
         }
     }
 
+
+    void frame_buffer::fill(frame_buffer::pixel_t colour) {
+        for(uint32_t i{0}; i < size_ ; ++i) {
+            *((uint32_t *) (fbmap + i + vinfo.xoffset)) = colour;
+        }
+    }
+
     frame_buffer::~frame_buffer() {
 #ifdef NDEBUG
         close_buffer();

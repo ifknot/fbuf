@@ -38,6 +38,8 @@ namespace linux_util {
 
         void clear();
 
+        void fill(pixel_t colour);
+
         ~frame_buffer();
 
 #ifndef NDEBUG
