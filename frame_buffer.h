@@ -40,6 +40,8 @@ namespace linux_util {
 
         void fill(pixel_t colour);
 
+        void swap();
+
         ~frame_buffer();
 
 #ifndef NDEBUG
@@ -80,6 +82,10 @@ namespace linux_util {
          */
          uint8_t* fbmap;
 
+         /**
+          * virtual frame buffer
+          */
+         uint8_t * vbmap;
     };
 
 }

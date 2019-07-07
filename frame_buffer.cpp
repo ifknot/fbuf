@@ -19,6 +19,7 @@ namespace linux_util {
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             size_ = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;//vinfo.yres_virtual * finfo.line_length;
             fbmap = static_cast<uint8_t*>(mmap(0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
+            vbmap = fbmap + size_;
             return true;
         } else {
             throw std::invalid_argument(strerror(errno));
@@ -47,14 +48,30 @@ namespace linux_util {
 
     void frame_buffer::clear() {
         for(uint32_t i{0}; i < size_ ; i += 2) {
-            *((uint32_t *) (fbmap + ((i + vinfo.xoffset) << 1))) = 0u;
+            *((uint32_t *) (vbmap + ((i + vinfo.xoffset) << 1))) = 0u;
         }
     }
 
     void frame_buffer::fill(frame_buffer::pixel_t colour) {
         for(uint32_t i{0}; i < size_ ; i += 2) {
-            *((uint32_t *) (fbmap + ((i + vinfo.xoffset) << 1))) = colour;
+            *((uint32_t *) (vbmap + ((i + vinfo.xoffset) << 1))) = colour;
         }
+    }
+
+    void frame_buffer::swap() {
+        if (vinfo.yoffset==0)
+            vinfo.yoffset = size_;
+        else
+            vinfo.yoffset=0;
+
+        //"Pan" to the back buffer
+        ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
+
+        //Update the pointer to the back buffer so we don't draw on the front buffer
+        uint8_t* tmp;
+        tmp=fbmap;
+        fbmap=vbmap;
+        vbmap=tmp;
     }
 
     frame_buffer::~frame_buffer() {
