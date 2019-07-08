@@ -3,7 +3,7 @@
 namespace linux_util {
 
     frame_buffer::frame_buffer(const std::string device_path): device_path(device_path) {
-        //open_buffer();
+        open_buffer();
     }
 
     bool frame_buffer::open_buffer() {
@@ -61,7 +61,7 @@ namespace linux_util {
     }
 
     frame_buffer::~frame_buffer() {
-        //close_buffer();
+        close_buffer();
     }
 
     std::string frame_buffer::info() {
