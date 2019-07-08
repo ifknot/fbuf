@@ -9,15 +9,15 @@ int main() {
 
     fbuf_t fb;
 
-
+/*
     for(uint32_t x = 0; x < 320; ++x) {
         fb.pixel(x, x, fb.rgb(0xFF,0,0));
     }
-
+*/
     //fb.clear();
 
     //fb.pixel(100,100,fb.rgb(0xff,0,0));
-    //fb.swap();
+    fb.swap();
 
     std::cout << fb.info() << std::endl;
 
