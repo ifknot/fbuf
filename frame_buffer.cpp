@@ -16,8 +16,8 @@ namespace linux_util {
             ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // re-acquire variable info
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             screensize = vinfo.yres_virtual * finfo.line_length;
-            fbmap = static_cast<uint8_t *>(mmap(0, screensize * 2, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_SHARED | MAP_FIXED, fbfd, (off_t) 0));
-            vbmap = fbmap + screensize;
+            fbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
+            vbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, (off_t)0));
             return true;
         } else {
             throw std::invalid_argument(strerror(errno));
@@ -53,24 +53,9 @@ namespace linux_util {
     }
 
     void frame_buffer::swap() {
-        /*
-        vinfo.yoffset = (vinfo.yoffset == 0u) ?screensize :0u;
-        //ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo);
-        ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
-        std::swap(fbmap, vbmap);
-         */
-        if (vinfo.yoffset==0)
-            vinfo.yoffset = screensize;
-        else
-            vinfo.yoffset=0;
-
-        //"Pan" to the back buffer
-        ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
-
-        //Update the pointer to the back buffer so we don't draw on the front buffer
-        auto tmp=fbmap;
-        fbmap=vbmap;
-        vbmap=tmp;
+        for (size_t i{0}; i <(vinfo.yres_virtual * finfo.line_length) / 2; ++i) {
+            ((pixel_t *)(fbmap))[i] = vbmap[i];
+        }
     }
 
     frame_buffer::~frame_buffer() {
