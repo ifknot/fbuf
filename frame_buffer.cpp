@@ -3,7 +3,7 @@
 namespace linux_util {
 
     frame_buffer::frame_buffer(const std::string device_path): device_path(device_path) {
-        //open_buffer();
+        open_buffer();
     }
 
     bool frame_buffer::open_buffer() {
@@ -17,7 +17,7 @@ namespace linux_util {
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             size_ = vinfo.yres_virtual * finfo.line_length;
             fbmap = static_cast<uint8_t*>(mmap(0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
-            vbmap = fbmap;// + size_;
+            vbmap = fbmap + size_;
             return true;
         } else {
             throw std::invalid_argument(strerror(errno));
@@ -64,11 +64,11 @@ namespace linux_util {
     }
 
     frame_buffer::~frame_buffer() {
-        //close_buffer();
+        close_buffer();
     }
 
     std::string frame_buffer::info() {
-        printf("\nframe\t\t%p\nvirtual\t\t%p", fbmap, vbmap);
+        printf("\nframe\t\t%p\nvirtual\t\t%p\nsize\t\t%X", fbmap, vbmap, size_);
         std::stringstream ss;
         ss  << "\nxres\t\t" << vinfo.xres
             << "\nyres\t\t" << vinfo.yres
