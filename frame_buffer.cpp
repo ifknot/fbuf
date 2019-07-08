@@ -74,6 +74,7 @@ namespace linux_util {
 #ifndef NDEBUG
 
     std::string frame_buffer::info() {
+        printf("\nframe\t\t%X\nvirtual\t\t%X", fbmap, vbmap);
         std::stringstream ss;
         ss  << "xres\t\t" << vinfo.xres
             << "\nyres\t\t" << vinfo.yres
