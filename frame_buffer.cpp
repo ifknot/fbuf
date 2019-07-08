@@ -16,9 +16,8 @@ namespace linux_util {
             ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // re-acquire variable info
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             screensize = vinfo.yres_virtual * finfo.line_length;
-            fbmap = static_cast<uint8_t *>(mmap(0, screensize * 2, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t) 0));
-            vbmap = fbmap;
-            vbmap += vinfo.yres_virtual * finfo.line_length;
+            fbmap = static_cast<uint8_t *>(mmap(0, screensize + screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t) 0));
+            vbmap = fbmap + screensize;
             return true;
         } else {
             throw std::invalid_argument(strerror(errno));
