@@ -16,7 +16,7 @@ namespace linux_util {
             ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // re-acquire variable info
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             screensize = vinfo.yres_virtual * finfo.line_length;
-            fbmap = static_cast<uint8_t*>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
+            fbmap = static_cast<uint8_t*>(mmap(0, screensize * 2, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
             vbmap = fbmap;
             vbmap += vinfo.yres_virtual * finfo.line_length;
             return true;
