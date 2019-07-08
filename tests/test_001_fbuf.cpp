@@ -32,6 +32,7 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
                         usleep(5000);
 
                     }
+                    fb.clear();
                     //fb.swap();
                     std::cout << fb.info() << std::endl;
             }
