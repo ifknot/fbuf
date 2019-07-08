@@ -17,7 +17,7 @@ int main() {
 
     }
 */
-    fb.clear();
+    //fb.clear();
 
     std::cout << fb.info() << std::endl;
 
