@@ -53,10 +53,24 @@ namespace linux_util {
     }
 
     void frame_buffer::swap() {
+        /*
         vinfo.yoffset = (vinfo.yoffset == 0u) ?screensize :0u;
         //ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo);
         ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
         std::swap(fbmap, vbmap);
+         */
+        if (vinfo.yoffset==0)
+            vinfo.yoffset = screensize;
+        else
+            vinfo.yoffset=0;
+
+        //"Pan" to the back buffer
+        ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
+
+        //Update the pointer to the back buffer so we don't draw on the front buffer
+        auto tmp=fbmap;
+        fbmap=vbmap;
+        vbmap=tmp;
     }
 
     frame_buffer::~frame_buffer() {
