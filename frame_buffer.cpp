@@ -47,13 +47,13 @@ namespace linux_util {
     }
 
     void frame_buffer::clear() {
-        for (size_t i{0}; i < (vinfo.yres_virtual * finfo.line_length) / 2; ++i) {
+        for (size_t i{0}; i < size_ << 1; ++i) {
             ((pixel_t*)(vbmap))[i] = 0u;
         }
     }
 
     void frame_buffer::fill(frame_buffer::pixel_t colour) {
-        for (size_t i{0}; i < (vinfo.yres_virtual * finfo.line_length) / 2; ++i) {
+        for (size_t i{0}; i < size_ << 1; ++i) {
             ((pixel_t*)(vbmap))[i] = colour;
         }
     }
@@ -78,8 +78,8 @@ namespace linux_util {
         ss  << "xres\t\t" << vinfo.xres
             << "\nyres\t\t" << vinfo.yres
             << "\nmemory\t\t" << size_ << " bytes"
-            << "\nframe\t\t" << std::hex << fbmap
-            << "\virtual\t\t" << vbmap << std::dec
+            << "\nframe\t\t" << fbmap
+            << "\virtual\t\t" << vbmap
             << "\nxres_virtual\t" << vinfo.xres_virtual
             << "\nyres_virtual\t" << vinfo.yres_virtual
             << "\nxoffset\t\t" << vinfo.xoffset
