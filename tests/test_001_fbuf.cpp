@@ -24,10 +24,10 @@ SCENARIO("instantiating a frame_buffer, open and close succeeds", "[fbuf]") {
                 THEN("valid size returned") {
                     REQUIRE(fb.size() != 0);
 
-                    fb.swap();
+                    //fb.swap();
 
                     for(uint32_t x = 0; x < fb.vinfo.yres; ++x) {
-                        fb.clear();
+                        fb.fill(fb.rgb(0xFF, 0xFF, 0xFF));
                         fb.pixel(x, x, fb.rgb(0xFF,0,0));
                         usleep(5000);
 

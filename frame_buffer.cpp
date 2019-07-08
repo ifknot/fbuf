@@ -43,18 +43,18 @@ namespace linux_util {
     }
 
     void frame_buffer::pixel(uint32_t x, uint32_t y, pixel_t colour) {
-        *((uint32_t *) (vbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
+        *((pixel_t*) (vbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
     }
 
     void frame_buffer::clear() {
-        for(uint32_t i{0}; i < size_ ; i += 2) {
-            *((uint32_t *) (vbmap + vinfo.yoffset + ((i + vinfo.xoffset) << 1))) = 0u;
+        for (size_t i{0}; i < (vinfo.yres_virtual * finfo.line_length) / 2; ++i) {
+            ((pixel_t*)(vbmap))[i] = 0u;
         }
     }
 
     void frame_buffer::fill(frame_buffer::pixel_t colour) {
-        for(uint32_t i{0}; i < size_ ; i += 2) {
-            *((uint32_t *) (vbmap + vinfo.yoffset + ((i + vinfo.xoffset) << 1))) = colour;
+        for (size_t i{0}; i < (vinfo.yres_virtual * finfo.line_length) / 2; ++i) {
+            ((pixel_t*)(vbmap))[i] = colour;
         }
     }
 
