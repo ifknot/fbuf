@@ -3,9 +3,7 @@
 namespace linux_util {
 
     frame_buffer::frame_buffer(const std::string device_path): device_path(device_path) {
-#ifdef NDEBUG
         open_buffer();
-#endif
     }
 
     bool frame_buffer::open_buffer() {
@@ -67,12 +65,8 @@ namespace linux_util {
     }
 
     frame_buffer::~frame_buffer() {
-#ifdef NDEBUG
         close_buffer();
-#endif
     }
-
-#ifndef NDEBUG
 
     std::string frame_buffer::info() {
         std::stringstream ss;
@@ -91,7 +85,5 @@ namespace linux_util {
             << "\nwidth\t\t" << vinfo.width << "mm\n";
         return ss.str();
     }
-
-#endif
 
 }

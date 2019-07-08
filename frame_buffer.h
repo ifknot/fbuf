@@ -44,13 +44,9 @@ namespace linux_util {
 
         ~frame_buffer();
 
-#ifndef NDEBUG
         std::string info();
-#endif
 
-#ifdef NDEBUG
     private:
-#endif
 
         bool open_buffer();
 

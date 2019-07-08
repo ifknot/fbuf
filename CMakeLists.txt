@@ -14,7 +14,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 include_directories(tests)
 
 add_executable(fbuf
-        tests/catch2.h
         LICENSE
         main.cpp
-        README.md frame_buffer.cpp frame_buffer.h tests/test_001_fbuf.cpp)
+        README.md frame_buffer.cpp frame_buffer.h)
