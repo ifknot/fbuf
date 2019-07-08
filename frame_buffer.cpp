@@ -79,7 +79,7 @@ namespace linux_util {
             << "\nyres\t\t" << vinfo.yres
             << "\nmemory\t\t" << size_ << " bytes"
             << "\nframe\t\t" << fbmap
-            << "\virtual\t\t" << vbmap
+            << "\nvirtual\t\t" << vbmap
             << "\nxres_virtual\t" << vinfo.xres_virtual
             << "\nyres_virtual\t" << vinfo.yres_virtual
             << "\nxoffset\t\t" << vinfo.xoffset
