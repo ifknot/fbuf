@@ -47,13 +47,13 @@ namespace linux_util {
     }
 
     void frame_buffer::clear() {
-        for (size_t i{0}; i < size_ << 1; ++i) {
+        for (size_t i{0}; i < (vinfo.yres_virtual * finfo.line_length) / 2; ++i) {
             ((pixel_t*)(vbmap))[i] = 0u;
         }
     }
 
     void frame_buffer::fill(frame_buffer::pixel_t colour) {
-        for (size_t i{0}; i < size_ << 1; ++i) {
+        for (size_t i{0}; i < (vinfo.yres_virtual * finfo.line_length) / 2; ++i) {
             ((pixel_t*)(vbmap))[i] = colour;
         }
     }
