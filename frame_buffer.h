@@ -19,7 +19,7 @@
 
 namespace linux_util {
 
-    static const std::string FRAME_BUFFER_PATH = "/dev/fb1"; //Raspbian RPi 3.5" LCD on 2nd frame buffer
+    static const std::string FRAME_BUFFER_PATH = "/dev/fb0"; //Raspbian RPi 3.5" LCD on 2nd frame buffer
     static const int DEFAULT_BPB = 16; //RPi 3.5" LCD 16 bits per pixel 65536 colours XGA "High Color"
 
     class frame_buffer {
