@@ -19,8 +19,6 @@ int main() {
 */
     //fb.clear();
 
-    fb.cls();
-
     std::cout << fb.info() << std::endl;
 
     return 0;

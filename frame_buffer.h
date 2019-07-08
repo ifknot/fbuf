@@ -36,16 +36,6 @@ namespace linux_util {
 
         void clear();
 
-        void cls()
-        {
-            for (uint x=0;x<vinfo.xres;x++)
-                for (uint y=0;y<vinfo.yres;y++)
-                {
-                    long location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y+vinfo.yoffset) * finfo.line_length;
-                    *((uint32_t*)(vbmap + location)) = rgb(0xFF,0x00,0xFF);
-                }
-        }
-
         void fill(pixel_t colour);
 
         void swap();
