@@ -85,7 +85,7 @@ namespace linux_util {
          /**
           * virtual frame buffer
           */
-         uint8_t * vbmap;
+         uint8_t* vbmap;
     };
 
 }
