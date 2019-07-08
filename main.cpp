@@ -1,9 +1,8 @@
 
-//#define CATCH_CONFIG_RUNNER
-//#include "tests/catch2.h"
+#define CATCH_CONFIG_RUNNER
+#include "tests/catch2.h"
 
 #include "frame_buffer.h"
-#include <iostream>
 
 int main( int argc, char* argv[] ) {
 
