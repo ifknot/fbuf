@@ -18,7 +18,7 @@ namespace linux_util {
             size_ = vinfo.yres_virtual * finfo.line_length;
             fbmap = static_cast<uint8_t*>(mmap(0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0));
             vbmap = fbmap + size_;
-            printf("\nframe\t\t%p\nvirtual\t\t%p\nsize\t\t%d", fbmap, vbmap, size_);
+            printf("\nframe\t\t%p\nvirtual\t\t%p\n", fbmap, vbmap);
             return true;
         } else {
             throw std::invalid_argument(strerror(errno));
@@ -70,7 +70,7 @@ namespace linux_util {
 
     std::string frame_buffer::info() {
         std::stringstream ss;
-        ss  << "xres\t\t" << vinfo.xres
+        ss  << "\nxres\t\t" << vinfo.xres
             << "\nyres\t\t" << vinfo.yres
             << "\nmemory\t\t" << size_ << " bytes"
             << "\nxres_virtual\t" << vinfo.xres_virtual
