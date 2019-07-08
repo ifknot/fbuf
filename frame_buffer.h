@@ -46,7 +46,7 @@ namespace linux_util {
 
         std::string info();
 
-    private:
+    //private:
 
         bool open_buffer();
 

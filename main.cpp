@@ -10,6 +10,8 @@ int main() {
     fbuf_t fb;
     //fb.swap();
 
+    fb.open_buffer();
+
     for(uint32_t x = 0; x < 320; ++x) {
         fb.fill(fb.rgb(0xFF, 0xFF, 0xFF));
         fb.pixel(x, x, fb.rgb(0xFF,0,0));
@@ -20,6 +22,8 @@ int main() {
     fb.clear();
     //fb.swap();
     std::cout << fb.info() << std::endl;
+
+    fb.close_buffer();
 
     return 0;
 
