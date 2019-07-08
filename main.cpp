@@ -20,6 +20,7 @@ int main() {
     //fb.clear();
 
     fb.pixel(100,100,fb.rgb(0xff,0,0));
+    fb.swap();
 
     std::cout << fb.info() << std::endl;
 
