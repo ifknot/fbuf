@@ -78,6 +78,8 @@ namespace linux_util {
         ss  << "xres\t\t" << vinfo.xres
             << "\nyres\t\t" << vinfo.yres
             << "\nmemory\t\t" << size_ << " bytes"
+            << "\nframe\t\t" << std::hex << fbmap
+            << "\virtual\t\t" << vbmap << std::dec
             << "\nxres_virtual\t" << vinfo.xres_virtual
             << "\nyres_virtual\t" << vinfo.yres_virtual
             << "\nxoffset\t\t" << vinfo.xoffset
