@@ -16,9 +16,9 @@ int main() {
 */
     //fb.clear();
 
-    fb.pixel(100,100,fb.rgb(0xff,0,0));
-    fb.swap();
-    fb.pixel(200,200,fb.rgb(0xff,0,0));
+    fb.fill(fb.rgb(0xff,0,0));
+    //fb.swap();
+    //fb.pixel(200,200,fb.rgb(0xff,0,0));
     std::cout << fb.info() << std::endl;
 
     return 0;
