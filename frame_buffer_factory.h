@@ -20,8 +20,9 @@
 namespace linux_util {
 
     /**
-     * LCD map /dev/fb1 directly on the RPi ie no double buffering
-     * HDMI map /dev/fb0 on the RPi *uses* double buffering
+     * Raspberry Pi:
+     * LCD map /dev/fb1
+     * HDMI map /dev/fb0
      */
     enum screen_t {LCD, HDMI};
 
@@ -51,7 +52,9 @@ namespace linux_util {
             *((pixel_t*) (fbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
         }
 
-        //void line
+        void line(uint x1, uint y1, uint x2, uint y2) {
+
+        }
 
         void clear() {
             for (size_t i{0}; i < (screensize >> 3); ++i) {
@@ -100,9 +103,10 @@ namespace linux_util {
         void open_buffer() {
             fbfd = open(device_path.c_str(), O_RDWR);
             if(fbfd != -1) {
-                ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // acquire variable info
+                fioctl(FBIOGET_VSCREENINFO); // acquire variable info
                 vinfo.grayscale = 0; // ensure colour
                 vinfo.bits_per_pixel = DEFAULT_BPB; //ensure 16 bits per pixel
+                vinfo.yres_virtual = vinfo.yres * 2; //make space for virtual screen
                 ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo);
                 ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // re-acquire variable info
                 ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo); // aquire fixed info
@@ -120,6 +124,12 @@ namespace linux_util {
                 return;
             else
                 throw std::invalid_argument(strerror(errno));
+        }
+
+        void fioctl(unsigned long request) {
+            if (ioctl(fbfd, request, &vinfo)) {
+                throw std::invalid_argument(strerror(errno));
+            }
         }
 
         std::string device_path;
