@@ -116,7 +116,7 @@ namespace linux_util {
                 vioctl(FBIOPUT_VSCREENINFO);
                 vioctl(FBIOGET_VSCREENINFO); // re-acquire variable info
                 fioctl(FBIOGET_FSCREENINFO); // aquire fixed info
-                screensize = vinfo.xres_virtual * vinfo.yres_virtual;//vinfo.yres_virtual * finfo.line_length;
+                screensize = vinfo.yres * finfo.line_length;
                 fbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
                 vbmap = fbmap + screensize;
                 return;
@@ -126,7 +126,7 @@ namespace linux_util {
         }
 
         void close_buffer()  {
-            munmap(fbmap, screensize);
+            munmap(fbmap, screensize * 2);
             if (close(fbfd) == 0)
                 return;
             else
