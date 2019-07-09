@@ -9,14 +9,14 @@ int main() {
 
     fbuf_t fb{"/dev/fb0"};
     //fbuf_t fb;
-/*
+
     fb.rgb(0,0xff,0);
     fb.fill();
     usleep(5000000);
     fb.clear();
 
     fb.pixel(200,200);
-*/
+
     std::cout << fb.variable_info() << std::endl;
 
     return 0;
