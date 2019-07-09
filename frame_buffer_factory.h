@@ -76,7 +76,7 @@ namespace linux_util {
         }
 
         void swap() {
-            vinfo.yoffset =  * vinfo.yres;
+            //vinfo.yoffset =  * vinfo.yres;
             ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
             ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
         }
