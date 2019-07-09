@@ -53,13 +53,15 @@ namespace linux_util {
 
         void clear() {
             for (size_t i{0}; i < screensize / 4; ++i) {
-                ((pixel_t*)(fbmap))[i] = 0u;
+                ((uint32_t*)(fbmap))[i] = 0u;
             }
         }
 
         void fill(pixel_t colour)  {
+            uint32_t pixpix = colour << 4;
+            pixpix |= colour;
             for (size_t i{0}; i < screensize / 4; ++i) {
-                ((pixel_t*)(fbmap))[i] = colour;
+                ((uint32_t*)(fbmap))[i] = pixpix;
             }
         }
 
