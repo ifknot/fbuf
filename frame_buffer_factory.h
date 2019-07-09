@@ -52,7 +52,7 @@ namespace linux_util {
         }
 
         void clear() {
-            for (size_t i{0}; i < (screensize << 3); ++i) {
+            for (size_t i{0}; i < (screensize / 8); ++i) {
                 ((uint64_t*)(fbmap))[i] = 0u;
             }
         }
@@ -60,7 +60,7 @@ namespace linux_util {
         void fill(pixel_t colour)  {
             uint32_t pixpix = colour << 16;
             pixpix |= colour;
-            for (size_t i{0}; i < (screensize << 2); ++i) {
+            for (size_t i{0}; i < (screensize / 4); ++i) {
                 ((uint32_t*)(fbmap))[i] = pixpix;
             }
         }
