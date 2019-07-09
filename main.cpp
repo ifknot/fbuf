@@ -17,7 +17,7 @@ int main() {
     //fb.clear();
 
     fb.fill(fb.rgb(0xff,0,0));
-    usleep(500000);
+    usleep(5000000);
     fb.clear();
 
     fb.pixel(200,200,fb.rgb(0xff,0,0));
