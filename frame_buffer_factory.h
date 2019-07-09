@@ -103,13 +103,13 @@ namespace linux_util {
         void open_buffer() {
             fbfd = open(device_path.c_str(), O_RDWR);
             if(fbfd != -1) {
-                fioctl(FBIOGET_VSCREENINFO); // acquire variable info
+                vioctl(FBIOGET_VSCREENINFO); // acquire variable info
                 vinfo.grayscale = 0; // ensure colour
                 vinfo.bits_per_pixel = DEFAULT_BPB; //ensure 16 bits per pixel
                 vinfo.yres_virtual = vinfo.yres * 2; //make space for virtual screen
-                ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo);
-                ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // re-acquire variable info
-                ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo); // aquire fixed info
+                vioctl(FBIOPUT_VSCREENINFO);
+                vioctl(FBIOGET_VSCREENINFO); // re-acquire variable info
+                fioctl(FBIOGET_FSCREENINFO); // aquire fixed info
                 screensize = vinfo.yres_virtual * finfo.line_length;
                 fbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
                 return;
@@ -126,8 +126,14 @@ namespace linux_util {
                 throw std::invalid_argument(strerror(errno));
         }
 
-        void fioctl(unsigned long request) {
+        void vioctl(unsigned long request) {
             if (ioctl(fbfd, request, &vinfo)) {
+                throw std::invalid_argument(strerror(errno));
+            }
+        }
+
+        void fioctl(unsigned long request) {
+            if (ioctl(fbfd, request, &finfo)) {
                 throw std::invalid_argument(strerror(errno));
             }
         }
