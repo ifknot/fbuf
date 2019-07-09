@@ -58,9 +58,15 @@ namespace linux_util {
         }
 
         void fill(pixel_t colour)  {
-            uint32_t pixpix = (colour << 16) | colour;
-            for (size_t i{0}; i < (screensize / 4); ++i) {
-                ((uint32_t*)(fbmap))[i] = pixpix;
+            uint64_t c = colour;
+            c <<= 16;
+            c |= colour;
+            c <<= 32;
+            c |= colour;
+            c <<= 48;
+            c |= colour;
+            for (size_t i{0}; i < (screensize / 8); ++i) {
+                ((uint64_t*)(fbmap))[i] = c;
             }
         }
 
