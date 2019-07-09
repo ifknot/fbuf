@@ -43,13 +43,15 @@ namespace linux_util {
             open_buffer();
         }
 
-        pixel_t rgb(uint8_t r, uint8_t g, uint8_t b) {
-            return (r << vinfo.red.offset) | (g << vinfo.green.offset) | (b << vinfo.blue.offset);
+        void rgb(uint8_t r, uint8_t g, uint8_t b) {
+            colour = (r << vinfo.red.offset) | (g << vinfo.green.offset) | (b << vinfo.blue.offset);
         }
 
-        void pixel(uint x, uint y, pixel_t colour) {
+        void pixel(uint x, uint y) {
             *((pixel_t*) (fbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
         }
+
+        //void line
 
         void clear() {
             for (size_t i{0}; i < (screensize / 8); ++i) {
@@ -57,7 +59,7 @@ namespace linux_util {
             }
         }
 
-        void fill(pixel_t colour)  {
+        void fill()  {
             uint32_t c = colour;
             c <<= 16;
             c |= colour;
@@ -79,8 +81,8 @@ namespace linux_util {
             ss  << "\nxres\t\t" << vinfo.xres
                 << "\nyres\t\t" << vinfo.yres
                 << "\nbuffer addr\t" << std::hex << static_cast<const void *>(fbmap)
-                << "\nscreen memory\t" << vinfo.yres_virtual * finfo.line_length << " bytes"
-                << "\nxres_virtual\t" << std::dec << vinfo.xres_virtual
+                << "\nscreen memory\t" << std::dec << vinfo.yres_virtual * finfo.line_length << " bytes"
+                << "\nxres_virtual\t" << vinfo.xres_virtual
                 << "\nyres_virtual\t" << vinfo.yres_virtual
                 << "\nxoffset\t\t" << vinfo.xoffset
                 << "\nyoffset\t\t" << vinfo.yoffset
@@ -124,6 +126,7 @@ namespace linux_util {
         int fbfd{-1}; //frame buffer file descriptor
         uint32_t screensize{0};
         uint8_t* fbmap{0}; //frame buffer memory map
+        pixel_t colour{0};
 
         /**
          * Used to describe the features of a video card that are _user_ defined.
