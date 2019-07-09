@@ -49,7 +49,7 @@ namespace linux_util {
         }
 
         void pixel(uint x, uint y) {
-            *((pixel_t*) (fbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
+            *((pixel_t*) (vbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
         }
 
         void line(uint x1, uint y1, uint x2, uint y2) {
@@ -112,6 +112,7 @@ namespace linux_util {
                 fioctl(FBIOGET_FSCREENINFO); // aquire fixed info
                 screensize = vinfo.yres_virtual * finfo.line_length;
                 fbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
+                vbmap = fbmap + screensize;
                 return;
             } else {
                 throw std::invalid_argument(strerror(errno));
@@ -142,6 +143,7 @@ namespace linux_util {
         int fbfd{-1}; //frame buffer file descriptor
         uint32_t screensize{0};
         uint8_t* fbmap{0}; //frame buffer memory map
+        uint8_t* vbmap{0}; //virtual buffer memory map
         pixel_t colour{0};
 
         /**
