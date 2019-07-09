@@ -60,15 +60,15 @@ namespace linux_util {
         }
 
         void fill()  {
-            uint32_t c = colour;
+            uint64_t c = colour;
             c <<= 16;
             c |= colour;
-            //c <<= 32;
-            //c |= colour;
-            //c <<= 48;
-            //c |= colour;
+            c <<= 16;
+            c |= colour;
+            c <<= 16;
+            c |= colour;
             for (size_t i{0}; i < (screensize / 8); ++i) {
-                ((uint32_t*)(fbmap))[i] = c;
+                ((uint64_t*)(fbmap))[i] = c;
             }
         }
 
