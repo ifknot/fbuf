@@ -22,4 +22,9 @@ void pixel(uint32_t x, uint32_t y, pixel_t colour) {
         *((pixel_t*) (vbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
 }
 ```
+:(
+```
+Segmentation fault
+```
+
 
