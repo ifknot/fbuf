@@ -75,6 +75,12 @@ namespace linux_util {
             }
         }
 
+        void swap() {
+            vinfo.yoffset =  * vinfo.yres;
+            ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
+            ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
+        }
+
         ~frame_buffer_factory()  {
             close_buffer();
         }
@@ -84,7 +90,7 @@ namespace linux_util {
             ss  << "\nxres\t\t" << vinfo.xres
                 << "\nyres\t\t" << vinfo.yres
                 << "\nbuffer addr\t" << std::hex << static_cast<const void *>(fbmap)
-                << "\nscreen memory\t" << std::dec << vinfo.yres_virtual * finfo.line_length << " bytes"
+                << "\nscreen memory\t" << std::dec << screensize << " bytes"
                 << "\nxres_virtual\t" << vinfo.xres_virtual
                 << "\nyres_virtual\t" << vinfo.yres_virtual
                 << "\nxoffset\t\t" << vinfo.xoffset
