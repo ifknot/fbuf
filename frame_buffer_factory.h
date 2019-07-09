@@ -71,8 +71,9 @@ namespace linux_util {
             std::stringstream ss;
             ss  << "\nxres\t\t" << vinfo.xres
                 << "\nyres\t\t" << vinfo.yres
-                << "\nmemory\t\t" << vinfo.yres_virtual * finfo.line_length << " bytes"
-                << "\nxres_virtual\t" << vinfo.xres_virtual
+                << "\nbuffer addr\t" << std::hex << static_cast<const void *>(fbmap)
+                << "\nscreen memory\t" << vinfo.yres_virtual * finfo.line_length << " bytes"
+                << "\nxres_virtual\t" << std::dec << vinfo.xres_virtual
                 << "\nyres_virtual\t" << vinfo.yres_virtual
                 << "\nxoffset\t\t" << vinfo.xoffset
                 << "\nyoffset\t\t" << vinfo.yoffset
