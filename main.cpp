@@ -15,7 +15,7 @@ int main() {
     usleep(5000000);
     fb.clear();
 
-    fb.pixel(200,200);
+    //fb.pixel(200,200);
 
     std::cout << fb.variable_info() << std::endl;
 

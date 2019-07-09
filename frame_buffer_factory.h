@@ -49,7 +49,7 @@ namespace linux_util {
         }
 
         void pixel(uint x, uint y) {
-            *((pixel_t*) (vbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
+            *((pixel_t*) (fbmap + ((x + vinfo.xoffset) << 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
         }
 
         void line(uint x1, uint y1, uint x2, uint y2) {
