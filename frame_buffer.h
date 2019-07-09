@@ -19,7 +19,8 @@
 
 namespace linux_util {
 
-    static const std::string FRAME_BUFFER_PATH = "/dev/fb1"; //Raspbian RPi 3.5" LCD on 2nd frame buffer
+    static const std::string RPi_HDMI = "/dev/fb0";
+    static const std::string RPi_LCD = "/dev/fb1"; //Raspbian RPi 3.5" LCD on 2nd frame buffer
     static const int DEFAULT_BPB = 16; //RPi 3.5" LCD 16 bits per pixel 65536 colours XGA "High Color"
 
     class frame_buffer {
@@ -28,7 +29,7 @@ namespace linux_util {
 
         using pixel_t = uint16_t; //RPi 3.5" LCD 16 bits per pixel
 
-        frame_buffer(const std::string device_path = FRAME_BUFFER_PATH);
+        frame_buffer(const std::string device_path);
 
         pixel_t rgb(uint8_t r, uint8_t g, uint8_t b);
 

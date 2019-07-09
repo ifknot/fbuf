@@ -7,7 +7,7 @@ int main() {
 
     using fbuf_t = linux_util::frame_buffer;
 
-    fbuf_t fb;
+    fbuf_t fb(linux_util::RPi_LCD);
 
 /*
     for(uint32_t x = 0; x < 320; ++x) {
@@ -16,9 +16,9 @@ int main() {
 */
     //fb.clear();
 
-    fb.fill(fb.rgb(0xff,0,0));
-    fb.swap();
-    fb.clear();
+    //fb.fill(fb.rgb(0xff,0,0));
+    //fb.swap();
+    //fb.clear();
     fb.pixel(200,200,fb.rgb(0xff,0,0));
     fb.swap();
     std::cout << fb.info() << std::endl;

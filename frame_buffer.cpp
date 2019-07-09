@@ -16,8 +16,8 @@ namespace linux_util {
             ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo); // re-acquire variable info
             ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo);
             screensize = vinfo.yres_virtual * finfo.line_length;
-            fbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
-            vbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, (off_t)0));
+            fbmap = static_cast<uint8_t *>(mmap(0, screensize * 2, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, fbfd, (off_t)0));
+            vbmap = fbmap + screensize;
             return true;
         } else {
             throw std::invalid_argument(strerror(errno));
@@ -53,9 +53,14 @@ namespace linux_util {
     }
 
     void frame_buffer::swap() {
+        vinfo.yoffset = (vinfo.yoffset == 0u) ?screensize :0u;
+        ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
+        std::swap(fbmap, vbmap);
+        /*
         for (size_t i{0}; i < screensize << 1; ++i) {
             ((pixel_t *)(fbmap))[i] = vbmap[i];
         }
+        */
     }
 
     frame_buffer::~frame_buffer() {
