@@ -52,13 +52,13 @@ namespace linux_util {
         }
 
         void clear() {
-            for (size_t i{0}; i < screensize << 1; ++i) {
+            for (size_t i{0}; i < 10) {
                 ((pixel_t*)(fbmap))[i] = 0u;
             }
         }
 
         void fill(pixel_t colour)  {
-            for (size_t i{0}; i < screensize << 1; ++i) {
+            for (size_t i{0}; i < 10; ++i) {
                 ((pixel_t*)(fbmap))[i] = colour;
             }
         }
