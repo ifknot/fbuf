@@ -78,7 +78,7 @@ namespace linux_util {
             y *= vinfo.xres;
             y += x;
             for(size_t i{0}; i < width; ++i) {
-                ((pixel_t *) (fbmap))[y + i] = colour;
+                ((pixel_t *) (vbmap))[y + i] = colour;
             }
         }
 
@@ -86,9 +86,16 @@ namespace linux_util {
             y *= vinfo.xres;
             y += x;
             for(size_t i{0}; i < height; ++i) {
-                ((pixel_t *) (fbmap))[y] = colour;
+                ((pixel_t *) (vbmap))[y] = colour;
                 y += vinfo.xres;
             }
+        }
+
+        void rect(size_t x, size_t y, size_t width, size_t height)  {
+            hline(x, y, width);
+            vline(x, y, height);
+            hline(x, y + height, width);
+            vline(x + width, y, height);
         }
 
         void line(uint x1, uint y1, uint x2, uint y2) {
@@ -96,9 +103,24 @@ namespace linux_util {
         }
 
         void swap() {
-            //vinfo.yoffset =  * vinfo.yres;
-            ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
+            std::swap(fbmap, vbmap);
+        }
+
+        void slide() {
+
+            vinfo.yoffset = (vinfo.yoffset == 0) ?vinfo.yres :0u;
+
             ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
+            ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
+
+        }
+        void slideb() {
+
+            vinfo.yoffset = 0u;
+
+            ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
+            ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
+
         }
 
         ~frame_buffer_factory()  {
@@ -113,8 +135,10 @@ namespace linux_util {
             ss  << "\nxres\t\t" << vinfo.xres
                 << "\nyres\t\t" << vinfo.yres
                 << "\nbuffer addr\t" << std::hex << static_cast<const void *>(fbmap)
-                << "\nscreen memory\t" << screensize << " bytes"
-                << "\nxres_virtual\t" << std::dec << vinfo.xres_virtual
+                << "\nfinfo.smem_start\t" << finfo.smem_start
+                << "\nscreen memory\t" << std::dec << screensize << " bytes"
+                << "\nbuffer memory\t" << finfo.smem_len << " bytes"
+                << "\nxres_virtual\t" << vinfo.xres_virtual
                 << "\nyres_virtual\t" << vinfo.yres_virtual
                 << "\nxoffset\t\t" << vinfo.xoffset
                 << "\nyoffset\t\t" << vinfo.yoffset
@@ -143,7 +167,6 @@ namespace linux_util {
         }
 
         void close_buffer()  {
-            munmap(fbmap, screensize);
             if (close(fbfd) == 0)
                 return;
             else
@@ -156,21 +179,23 @@ namespace linux_util {
             vinfo.xres = 640;
             vinfo.yres = 480;
             vinfo.xres_virtual = vinfo.xres;
-            vinfo.yres_virtual = vinfo.yres;
+            vinfo.yres_virtual = vinfo.yres * 2;
             vinfo.grayscale = 0; // ensure colour
             vinfo.bits_per_pixel = DEFAULT_BPP;
-            //vinfo.yres_virtual = vinfo.yres * 2; //make space for virtual screen
+            vinfo.activate = FB_ACTIVATE_VBL;
             vioctl(FBIOPUT_VSCREENINFO); // write new vinfo
             vioctl(FBIOGET_VSCREENINFO); // re-acquire variable info
             fioctl(FBIOGET_FSCREENINFO); // acquire fixed info
             screensize = vinfo.yres * finfo.line_length;
-            fbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
+            fbmap = static_cast<uint8_t *>(mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
+            vbmap = fbmap + screensize;
         }
 
         void restore_screen() {
             if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo_old)) {
                 throw std::invalid_argument(strerror(errno));
             }
+            munmap(fbmap, screensize);
         }
 
         void hide_cursor() {
@@ -190,13 +215,13 @@ namespace linux_util {
             }
         }
 
-        void vioctl(unsigned long request) {
+        inline void vioctl(unsigned long request) {
             if (ioctl(fbfd, request, &vinfo)) {
                 throw std::invalid_argument(strerror(errno));
             }
         }
 
-        void fioctl(unsigned long request) {
+        inline void fioctl(unsigned long request) {
             if (ioctl(fbfd, request, &finfo)) {
                 throw std::invalid_argument(strerror(errno));
             }
