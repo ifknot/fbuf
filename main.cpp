@@ -11,13 +11,17 @@ int main() {
     //fb.clear();
 
     fb.rgb(0,0xff,0);
-    //fb.fill();
-    //usleep(5000000);
-    //fb.rgb(0,0,0);
-    //fb.fill();
+    fb.fill(0,0,640,480);
+    usleep(500000);
+    fb.rgb(0xff,0,0);
+    fb.fill(160,120,320,240);
+    usleep(500000);
     fb.clear();
-
-    //fb.pixel(320,240);
+    fb.rgb(0xff,0xff,0xff);
+    fb.pixel(320,240);
+    fb.hline(160,120,320);
+    fb.vline(160,120,240);
+    usleep(5000000);
 
     std::cout << fb.variable_info() << std::endl;
 

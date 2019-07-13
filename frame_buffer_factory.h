@@ -40,41 +40,59 @@ namespace linux_util {
 
         using pixel_t = uint32_t;
 
-        //Raspbian RPi 3.5" LCD on 2nd frame buffer ie /dev/fb1
         frame_buffer_factory(const std::string device_path = "/dev/fb0"): device_path(device_path) {
             open_buffer();
-            hide_cursor();
             init_screen();
+            hide_cursor();
         }
 
         void rgb(pixel_t r, pixel_t g, pixel_t b, pixel_t a = 0xFF) {
             colour = (r << vinfo.red.offset) | (g << vinfo.green.offset) | (b << vinfo.blue.offset) | (a << vinfo.transp.offset);
         }
 
-        void pixel(uint x, uint y) {
-            *((pixel_t*) (fbmap + ((x + vinfo.xoffset) >> 1) + (y + vinfo.yoffset) * finfo.line_length)) = colour;
-            //((pixel_t*) (fbmap))[((x + vinfo.xoffset) >> 1) + ((y + vinfo.yoffset) * finfo.line_length)] = colour;
-        }
-
-        void line(uint x1, uint y1, uint x2, uint y2) {
-
-        }
-
         void clear() {
             memset(fbmap, 0u, screensize);
         }
 
-        void fill()  {
+        void fill(size_t x, size_t y, size_t width, size_t height)  {
             uint64_t c = colour;
             c <<= vinfo.bits_per_pixel;
             c |= colour;
-            size_t offset{0};
-            for(size_t y{0}; y < vinfo.yres >> 1; ++y) {
-                for (size_t x{0}; x < vinfo.xres >> 2; ++x) {
-                    ((uint64_t *) (fbmap))[offset + x] = c;
+            size_t h{y + height};
+            size_t w{(x + width) >> 1}; // 2 x 32bit pixel_t per uint64_t
+            size_t linesize{finfo.line_length >> 3}; // 4 x 8bit bytes per pixel_t
+            size_t offset{y * linesize};
+            for(size_t i{y}; i < h; ++i) {
+                for (size_t j{(x >> 1)}; j < w; ++j) {
+                    ((uint64_t *) (fbmap))[offset + j] = c;
                 }
-                offset += finfo.line_length >> 3;
+                offset += linesize;
             }
+        }
+
+        inline void pixel(uint x, uint y) {
+            ((pixel_t *) (fbmap))[(y * vinfo.xres) + x] = colour;
+        }
+
+        void hline(size_t x, size_t y, size_t width)  {
+            y *= vinfo.xres;
+            y += x;
+            for(size_t i{0}; i < width; ++i) {
+                ((pixel_t *) (fbmap))[y + i] = colour;
+            }
+        }
+
+        void vline(size_t x, size_t y, size_t height)  {
+            y *= vinfo.xres;
+            y += x;
+            for(size_t i{0}; i < height; ++i) {
+                ((pixel_t *) (fbmap))[y] = colour;
+                y += vinfo.xres;
+            }
+        }
+
+        void line(uint x1, uint y1, uint x2, uint y2) {
+
         }
 
         void swap() {
@@ -95,9 +113,8 @@ namespace linux_util {
             ss  << "\nxres\t\t" << vinfo.xres
                 << "\nyres\t\t" << vinfo.yres
                 << "\nbuffer addr\t" << std::hex << static_cast<const void *>(fbmap)
-                << "\nline memory\t" << std::dec << linesize
                 << "\nscreen memory\t" << screensize << " bytes"
-                << "\nxres_virtual\t" << vinfo.xres_virtual
+                << "\nxres_virtual\t" << std::dec << vinfo.xres_virtual
                 << "\nyres_virtual\t" << vinfo.yres_virtual
                 << "\nxoffset\t\t" << vinfo.xoffset
                 << "\nyoffset\t\t" << vinfo.yoffset
@@ -136,14 +153,17 @@ namespace linux_util {
         void init_screen() {
             vioctl(FBIOGET_VSCREENINFO); // acquire variable info
             memcpy(&vinfo_old, &vinfo, sizeof(struct fb_var_screeninfo)); // copy for restore
+            vinfo.xres = 640;
+            vinfo.yres = 480;
+            vinfo.xres_virtual = vinfo.xres;
+            vinfo.yres_virtual = vinfo.yres;
             vinfo.grayscale = 0; // ensure colour
             vinfo.bits_per_pixel = DEFAULT_BPP;
             //vinfo.yres_virtual = vinfo.yres * 2; //make space for virtual screen
-            vioctl(FBIOPUT_VSCREENINFO);
+            vioctl(FBIOPUT_VSCREENINFO); // write new vinfo
             vioctl(FBIOGET_VSCREENINFO); // re-acquire variable info
             fioctl(FBIOGET_FSCREENINFO); // acquire fixed info
-            linesize = finfo.line_length / 2;
-            screensize = vinfo.yres * linesize;
+            screensize = vinfo.yres * finfo.line_length;
             fbmap = static_cast<uint8_t *>(mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
         }
 
@@ -185,7 +205,6 @@ namespace linux_util {
         std::string device_path;
         int fbfd{-1}; //frame buffer file descriptor
         int kbfd{-1}; //keyboard file descriptor
-        uint32_t linesize{0}; //visible line size bytes
         uint32_t screensize{0}; //visible screen size bytes
         uint8_t* fbmap{0}; //frame buffer memory map
         uint8_t* vbmap{0}; //virtual buffer memory map
