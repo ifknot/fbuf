@@ -1,13 +1,13 @@
 
 
-#include "frame_buffer_factory.h"
+#include "canvas_factory.h"
 #include <iostream>
 
 int main() {
 
-    using fbuf_t = linux_util::frame_buffer_factory<linux_util::HDMI>;
+    using fbuf_t = linux_util::canvas_factory<linux_util::HDMI>;
 
-    fbuf_t fb;
+    fbuf_t fb{640, 480};
 
     for(size_t i{0}; i < 100; ++i) {
         fb.rgb(0xff, 0xff, 0xff);

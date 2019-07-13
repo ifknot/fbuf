@@ -16,4 +16,4 @@ include_directories(tests)
 add_executable(fbuf
         LICENSE
         main.cpp
-        README.md frame_buffer_factory.h)
+        README.md canvas_factory.h)

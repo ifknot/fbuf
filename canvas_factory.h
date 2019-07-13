@@ -1,5 +1,5 @@
-#ifndef FBUF_FRAME_BUFFER_FACTORY_H
-#define FBUF_FRAME_BUFFER_FACTORY_H
+#ifndef FBUF_CANVAS_FACTORY_H
+#define FBUF_CANVAS_FACTORY_H
 
 #if (defined (LINUX) || defined (__linux__))
 
@@ -9,7 +9,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <linux/fb.h>
-#include <linux/kd.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
@@ -22,28 +21,27 @@ namespace linux_util {
 
     /**
      * Raspberry Pi:
-     * LCD map /dev/fb1
-     * HDMI map /dev/fb0
+     * HDMI map /dev/fb0 is double buffered
+     * LCD map /dev/fb1 and no double buffering due to hardware limitations
      */
     enum screen_t {HDMI, LCD};
 
     /**
-     * LCD frame buffer factory creates objects memory mapping the linux display screen buffer
-     * @tparam LCD
+     * HDMI 24bit colour canvas - the factory creates a RAII double buffered memory mapping of the linux display screen buffer for simple graphics
+     * @tparam HDMI
      */
     template<screen_t HDMI>
-    class frame_buffer_factory {
+    class canvas_factory {
 
-        const uint32_t DEFAULT_BPP = 32;
+        const uint32_t DEFAULT_BPP = 32; //24bit colour + 8bit transparency
 
     public:
 
         using pixel_t = uint32_t;
 
-        frame_buffer_factory(const std::string device_path = "/dev/fb0"): device_path(device_path) {
+        canvas_factory(size_t width, size_t height, const std::string device_path = "/dev/fb0"): device_path(device_path) {
             open_buffer();
-            init_screen();
-            hide_cursor();
+            init_screen(width, height);
         }
 
         void rgb(pixel_t r, pixel_t g, pixel_t b, pixel_t a = 0xFF) {
@@ -51,7 +49,7 @@ namespace linux_util {
         }
 
         void clear() {
-            memset(fbmap, 0u, screensize);
+            memset(screen1, 0u, screensize);
         }
 
         void fill(size_t x, size_t y, size_t width, size_t height)  {
@@ -64,21 +62,21 @@ namespace linux_util {
             size_t offset{y * linesize};
             for(size_t i{y}; i < h; ++i) {
                 for (size_t j{(x >> 1)}; j < w; ++j) {
-                    ((uint64_t *) (fbmap))[offset + j] = c;
+                    ((uint64_t *) (screen1))[offset + j] = c;
                 }
                 offset += linesize;
             }
         }
 
         inline void pixel(uint x, uint y) {
-            ((pixel_t *) (fbmap))[(y * vinfo.xres) + x] = colour;
+            ((pixel_t *) (screen1))[(y * vinfo.xres) + x] = colour;
         }
 
         void hline(size_t x, size_t y, size_t width)  {
             y *= vinfo.xres;
             y += x;
             for(size_t i{0}; i < width; ++i) {
-                ((pixel_t *) (vbmap))[y + i] = colour;
+                ((pixel_t *) (screen1))[y + i] = colour;
             }
         }
 
@@ -86,7 +84,7 @@ namespace linux_util {
             y *= vinfo.xres;
             y += x;
             for(size_t i{0}; i < height; ++i) {
-                ((pixel_t *) (vbmap))[y] = colour;
+                ((pixel_t *) (screen1))[y] = colour;
                 y += vinfo.xres;
             }
         }
@@ -103,15 +101,14 @@ namespace linux_util {
         }
 
         void swap() {
-            vinfo.yoffset = (vinfo.yoffset == 0) ?vinfo.yres :0u;
+            vinfo.yoffset = (vinfo.yoffset == screen1_yoffset) ?screen2_yoffset :screen1_yoffset;
             ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
             ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
-            std::swap(fbmap, vbmap);
+            std::swap(screen1, screen2);
         }
 
-        ~frame_buffer_factory()  {
+        ~canvas_factory()  {
             restore_screen();
-            show_cursor();
             close_buffer();
         }
 
@@ -120,7 +117,7 @@ namespace linux_util {
             std::stringstream ss;
             ss  << "\nxres\t\t" << vinfo.xres
                 << "\nyres\t\t" << vinfo.yres
-                << "\nbuffer addr\t" << std::hex << static_cast<const void *>(fbmap)
+                << "\nbuffer addr\t" << std::hex << static_cast<const void *>(screen0)
                 << "\nfinfo.smem_start\t" << finfo.smem_start
                 << "\nscreen memory\t" << std::dec << screensize << " bytes"
                 << "\nbuffer memory\t" << finfo.smem_len << " bytes"
@@ -159,46 +156,37 @@ namespace linux_util {
                 throw std::invalid_argument(strerror(errno));
         }
 
-        void init_screen() {
+        /**
+         * set up 2 x virtual screens for the canvas and leave the original screen unmolested
+         */
+        void init_screen(size_t width, size_t height) {
             vioctl(FBIOGET_VSCREENINFO); // acquire variable info
             memcpy(&vinfo_old, &vinfo, sizeof(struct fb_var_screeninfo)); // copy for restore
-            vinfo.xres = 640;
-            vinfo.yres = 480;
+            vinfo.xres = width;
+            vinfo.yres = height;
+            screen1_yoffset = vinfo.yres;
+            screen2_yoffset = screen1_yoffset + vinfo.yres;
             vinfo.xres_virtual = vinfo.xres;
-            vinfo.yres_virtual = vinfo.yres * 2;
+            vinfo.yres_virtual = vinfo.yres * 3; //make space for 2 virtual screens
+            vinfo.yoffset = screen2_yoffset; //so the first swap works correctly
             vinfo.grayscale = 0; // ensure colour
             vinfo.bits_per_pixel = DEFAULT_BPP;
             vinfo.activate = FB_ACTIVATE_VBL;
             vioctl(FBIOPUT_VSCREENINFO); // write new vinfo
             vioctl(FBIOGET_VSCREENINFO); // re-acquire variable info
             fioctl(FBIOGET_FSCREENINFO); // acquire fixed info
-            screensize = vinfo.yres * finfo.line_length;
-            fbmap = static_cast<uint8_t *>(mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
-            vbmap = fbmap + screensize;
+            screensize = vinfo.yres * finfo.line_length; // size of visible area
+            //memory map entire frame buffer of 3 x "screens"
+            screen0 = static_cast<uint8_t *>(mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
+            screen1 = screen0 + screensize; // offset each of the virtual screens
+            screen2 = screen1 + screensize;
         }
 
         void restore_screen() {
             if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo_old)) {
                 throw std::invalid_argument(strerror(errno));
             }
-            munmap(fbmap, screensize);
-        }
-
-        void hide_cursor() {
-            std::string kbfds{"/dev/tty"};
-            kbfd = open(kbfds.c_str(), O_WRONLY);
-            if (kbfd >= 0) {
-                ioctl(kbfd, KDSETMODE, KD_GRAPHICS);
-            } else {
-                throw std::invalid_argument(strerror(errno));
-            }
-        }
-
-        void show_cursor() {
-            if (kbfd >= 0) {
-                ioctl(kbfd, KDSETMODE, KD_TEXT);
-                close(kbfd);
-            }
+            munmap(screen0, finfo.smem_len);
         }
 
         inline void vioctl(unsigned long request) {
@@ -215,11 +203,16 @@ namespace linux_util {
 
         std::string device_path;
         int fbfd{-1}; //frame buffer file descriptor
-        int kbfd{-1}; //keyboard file descriptor
-        uint32_t screensize{0}; //visible screen size bytes
-        uint8_t* fbmap{0}; //frame buffer memory map
-        uint8_t* vbmap{0}; //virtual buffer memory map
-        pixel_t colour{0};
+        uint32_t screensize; //visible screen size bytes
+        //original screen & 2 virtual screen maps
+        uint8_t* screen0{0};
+        uint8_t* screen1{0};
+        uint8_t* screen2{0};
+        //offsets into the memory map
+        uint32_t screen1_yoffset;
+        uint32_t screen2_yoffset;
+        //colour used by graphic primitives
+        pixel_t colour;
 
         /**
          * Used to describe the features of a video card that are _user_ defined.
@@ -244,4 +237,4 @@ namespace linux_util {
 
 #endif // __linux__
 
-#endif //FBUF_FRAME_BUFFER_FACTORY_H
+#endif //FBUF_CANVAS_FACTORY_H
