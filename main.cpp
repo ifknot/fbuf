@@ -8,18 +8,18 @@ int main() {
     using fbuf_t = linux_util::frame_buffer_factory<linux_util::HDMI>;
 
     fbuf_t fb;
-    fb.rgb(0xff,0xff,0xff);
-    fb.rect(160, 120, 320, 240);
-    fb.slide();
-    fb.swap();
-    usleep(5000000);
 
+    for(size_t i{0}; i < 100; ++i) {
+        fb.rgb(0xff, 0xff, 0xff);
+        fb.rect(160, 120, 320, 240);
+        fb.swap();
+        usleep(100000);
 
-    fb.rgb(0xff, 0, 0xff);
-    fb.rect(160, 120, 320, 240);
-    fb.slide();
-    usleep(5000000);
-
+        fb.rgb(0xff, 0, 0xff);
+        fb.rect(180, 140, 280, 200);
+        fb.swap();
+        usleep(100000);
+    }
     fb.clear();
 
 

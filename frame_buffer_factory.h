@@ -103,24 +103,10 @@ namespace linux_util {
         }
 
         void swap() {
-            std::swap(fbmap, vbmap);
-        }
-
-        void slide() {
-
             vinfo.yoffset = (vinfo.yoffset == 0) ?vinfo.yres :0u;
-
             ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
             ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
-
-        }
-        void slideb() {
-
-            vinfo.yoffset = 0u;
-
-            ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
-            ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
-
+            std::swap(fbmap, vbmap);
         }
 
         ~frame_buffer_factory()  {
