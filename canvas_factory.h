@@ -28,30 +28,59 @@ namespace linux_util {
 
     /**
      * HDMI 24bit colour canvas - the factory creates a RAII double buffered memory mapping of the linux display screen buffer for simple graphics
+     * True colour 16,777,216 color variations
      * @tparam HDMI
      */
     template<screen_t HDMI>
     class canvas_factory {
 
-        const uint32_t DEFAULT_BPP = 32; //24bit colour + 8bit transparency
+        const uint32_t DEFAULT_BPP = 32; //24bit colour + 8bit transparency - 16,777,216 colours
 
     public:
 
+        /**
+         * 32-bits, 4 bytes per pixel
+         */
         using pixel_t = uint32_t;
 
+        /**
+         * Build a True Colour, double buffered, graphics canvas
+         * @param width         desired width as pixels
+         * @param height        desired height as pixels
+         * @param device_path   defaults to "/dev/fb0"
+         */
         canvas_factory(size_t width, size_t height, const std::string device_path = "/dev/fb0"): device_path(device_path) {
             open_buffer();
             init_screen(width, height);
         }
 
+        /**
+         * Set the active colour used by the graphics primitives
+         * @param r     8-bit red value
+         * @param g     8-bit green value
+         * @param b     8-bit blue value
+         * @param a     8-bit transparent value
+         */
         void rgb(pixel_t r, pixel_t g, pixel_t b, pixel_t a = 0xFF) {
             colour = (r << vinfo.red.offset) | (g << vinfo.green.offset) | (b << vinfo.blue.offset) | (a << vinfo.transp.offset);
         }
 
+        /**
+         * Clear the current active screen to black
+         * @note  changes not visible until ```swap()```
+         */
         void clear() {
             memset(screen1, 0u, screensize);
         }
 
+        /**
+         * Draw a rectangular block of colour
+         * @note  changes not visible until ```swap()```
+         * @param x
+         * @param y
+         * @param width
+         * @param height
+         */
         void fill(size_t x, size_t y, size_t width, size_t height)  {
             uint64_t c = colour;
             c <<= vinfo.bits_per_pixel;
@@ -68,10 +97,23 @@ namespace linux_util {
             }
         }
 
+        /**
+         *
+         * @note  changes not visible until ```swap()```
+         * @param x
+         * @param y
+         */
         inline void pixel(uint x, uint y) {
             ((pixel_t *) (screen1))[(y * vinfo.xres) + x] = colour;
         }
 
+        /**
+         * Fast horizontal line
+         * @note  changes not visible until ```swap()```
+         * @param x
+         * @param y
+         * @param width
+         */
         void hline(size_t x, size_t y, size_t width)  {
             y *= vinfo.xres;
             y += x;
@@ -80,6 +122,13 @@ namespace linux_util {
             }
         }
 
+        /**
+         * Fast vertical line
+         * @note  changes not visible until ```swap()```
+         * @param x
+         * @param y
+         * @param height
+         */
         void vline(size_t x, size_t y, size_t height)  {
             y *= vinfo.xres;
             y += x;
@@ -89,6 +138,13 @@ namespace linux_util {
             }
         }
 
+        /**
+         * Draw a rectangle
+         * @param x
+         * @param y
+         * @param width
+         * @param height
+         */
         void rect(size_t x, size_t y, size_t width, size_t height)  {
             hline(x, y, width);
             vline(x, y, height);
@@ -100,6 +156,9 @@ namespace linux_util {
 
         }
 
+        /**
+         * Swap the current invisible active working buffer into the visible inactive state
+         */
         void swap() {
             vinfo.yoffset = (vinfo.yoffset == screen1_yoffset) ?screen2_yoffset :screen1_yoffset;
             ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
@@ -107,11 +166,18 @@ namespace linux_util {
             std::swap(screen1, screen2);
         }
 
+        /**
+         * Safely RAII release memory resources
+         */
         ~canvas_factory()  {
             restore_screen();
             close_buffer();
         }
 
+        /**
+         *
+         * @return
+         */
         std::string variable_info()  {
             vioctl(FBIOGET_VSCREENINFO); // acquire variable info
             std::stringstream ss;
@@ -201,14 +267,15 @@ namespace linux_util {
             }
         }
 
-        std::string device_path;
+        std::string device_path; //TODO remove this and pass to init
         int fbfd{-1}; //frame buffer file descriptor
+        //TODO remove screensize and local to init
         uint32_t screensize; //visible screen size bytes
         //original screen & 2 virtual screen maps
         uint8_t* screen0{0};
         uint8_t* screen1{0};
         uint8_t* screen2{0};
-        //offsets into the memory map
+        //offsets into the virtual screen memory maps
         uint32_t screen1_yoffset;
         uint32_t screen2_yoffset;
         //colour used by graphic primitives
