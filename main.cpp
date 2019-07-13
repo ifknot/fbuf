@@ -5,17 +5,19 @@
 
 int main() {
 
-    using fbuf_t = linux_util::frame_buffer_factory<linux_util::LCD>;
+    using fbuf_t = linux_util::frame_buffer_factory<linux_util::HDMI>;
 
-    fbuf_t fb{"/dev/fb0"};
-    //fbuf_t fb;
+    fbuf_t fb;
+    //fb.clear();
 
     fb.rgb(0,0xff,0);
-    fb.fill();
-    usleep(5000000);
+    //fb.fill();
+    //usleep(5000000);
+    //fb.rgb(0,0,0);
+    //fb.fill();
     fb.clear();
 
-    //fb.pixel(200,200);
+    //fb.pixel(320,240);
 
     std::cout << fb.variable_info() << std::endl;
 
