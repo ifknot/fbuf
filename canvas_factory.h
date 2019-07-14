@@ -98,7 +98,7 @@ namespace linux_util {
         }
 
         /**
-         *
+         * Plot a single pixel current colour
          * @note  changes not visible until ```swap()```
          * @param x
          * @param y
@@ -108,7 +108,7 @@ namespace linux_util {
         }
 
         /**
-         * Fast horizontal line
+         * Fast horizontal line in current colour
          * @note  changes not visible until ```swap()```
          * @param x
          * @param y
@@ -123,7 +123,7 @@ namespace linux_util {
         }
 
         /**
-         * Fast vertical line
+         * Fast vertical line in current colour
          * @note  changes not visible until ```swap()```
          * @param x
          * @param y
@@ -139,7 +139,8 @@ namespace linux_util {
         }
 
         /**
-         * Draw a rectangle
+         * Draw a rectangle lines in current colour
+         * @note  changes not visible until ```swap()```
          * @param x
          * @param y
          * @param width
@@ -152,12 +153,20 @@ namespace linux_util {
             vline(x + width, y, height);
         }
 
+        /**
+         * TODO Bresh. line algo
+         * @note  changes not visible until ```swap()```
+         * @param x1
+         * @param y1
+         * @param x2
+         * @param y2
+         */
         void line(uint x1, uint y1, uint x2, uint y2) {
 
         }
 
         /**
-         * Swap the current invisible active working buffer into the visible inactive state
+         * Swap the off-screen active working buffer into the visible inactive state
          */
         void swap() {
             vinfo.yoffset = (vinfo.yoffset == screen1_yoffset) ?screen2_yoffset :screen1_yoffset;
@@ -201,6 +210,10 @@ namespace linux_util {
             return ss.str();
         }
 
+        /**
+         * Get framebuffer fixed screen info
+         * @return string - tabulated info
+         */
         std::string fixed_info() {
             fioctl(FBIOGET_FSCREENINFO);
             std::stringstream ss;
@@ -212,17 +225,21 @@ namespace linux_util {
                 << "\nvisual\t\t"<< finfo.visual
                 << "\nxpanstep\t"<< finfo.xpanstep      // zero if no hardware panning
                 << "\nypanstep\t"<< finfo.ypanstep      // zero if no hardware panning
-                << "\nywarpstep\t"<< finfo.ywrapstep    // zero if no hardware ywrap
+                << "\nywrapstep\t"<< finfo.ywrapstep    // zero if no hardware ywrap
                 << "\nline length\t"<< finfo.line_length    // length of a line in bytes
                 << "\nmap IO addr\t"<< std::hex << finfo.mmio_start // Start of Memory Mapped I/O (physical address)
                 << "\nmap length\t"<< std::dec << finfo. mmio_len << " bytes"   // Length of Memory Mapped I/O
-                << "\nacell\t\t"<< finfo.accel		    // Indicate to driver which	specific chip/card we have
-                << "\ncapabilities\t"<< finfo.capabilities;
+                << "\naccel\t\t"<< finfo.accel		    // Indicate to driver which	specific chip/card we have
+                << "\ncapabilities\t"<< finfo.capabilities << "\n";
             return ss.str();
         }
 
     private:
 
+        /**
+         * Acquire the frame buffer file descriptor in read and write mode
+         * @throws std::invalid_argument(strerror(errno))
+         */
         void open_buffer() {
             fbfd = open(device_path.c_str(), O_RDWR);
             if(fbfd != -1) {
@@ -232,6 +249,10 @@ namespace linux_util {
             }
         }
 
+        /**
+         * Release the file descriptor
+         * @throws std::invalid_argument(strerror(errno))
+         */
         void close_buffer()  {
             if (close(fbfd) == 0)
                 return;
@@ -240,7 +261,10 @@ namespace linux_util {
         }
 
         /**
-         * set up 2 x virtual screens for the canvas and leave the original screen unmolested
+         * Change the screen resolution, bits per pixel, and set up 2 x virtual screens for the canvas
+         * @note canvas uses 2 new buffers and leaves the original screen buffer (screen0) unmolested
+         * @param width - visible screen dimensions
+         * @param height
          */
         void init_screen(size_t width, size_t height) {
             vioctl(FBIOGET_VSCREENINFO); // acquire variable info
@@ -265,6 +289,10 @@ namespace linux_util {
             screen2 = screen1 + screensize;
         }
 
+        /**
+         * Restore the original screen parameters from ```vinfo_old```
+         * @throws std::invalid_argument(strerror(errno))
+         */
         void restore_screen() {
             if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo_old)) {
                 throw std::invalid_argument(strerror(errno));
@@ -272,12 +300,22 @@ namespace linux_util {
             munmap(screen0, finfo.smem_len);
         }
 
+        /**
+         * Variable info helper
+         * @throws std::invalid_argument(strerror(errno))
+         * @param request
+         */
         inline void vioctl(unsigned long request) {
             if (ioctl(fbfd, request, &vinfo)) {
                 throw std::invalid_argument(strerror(errno));
             }
         }
 
+        /**
+         * Fixed info helper
+         * @throws std::invalid_argument(strerror(errno))
+         * @param request
+         */
         inline void fioctl(unsigned long request) {
             if (ioctl(fbfd, request, &finfo)) {
                 throw std::invalid_argument(strerror(errno));
@@ -286,7 +324,7 @@ namespace linux_util {
 
         std::string device_path; //TODO remove this and pass to init
         int fbfd{-1}; //frame buffer file descriptor
-        //TODO remove screensizeb        and local to init
+        //TODO remove screensize and local to init
         uint32_t screensize; //visible screen size bytes
         //original screen & 2 virtual screen maps
         uint8_t* screen0{0};
