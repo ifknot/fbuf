@@ -9,6 +9,8 @@ int main() {
 
     canvas_t canvas{640, 480};
 
+    /*
+
     for(size_t i{0}; i < 100; ++i) {
         canvas.rgb(0xff, 0xff, 0xff);
         canvas.rect(160, 120, 320, 240);
@@ -22,8 +24,10 @@ int main() {
     }
     canvas.clear();
 
+    */
 
     std::cout << canvas.variable_info() << std::endl;
+    std::cout << canvas.fixed_info() << std::endl;
 
     return 0;
 

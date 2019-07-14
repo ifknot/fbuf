@@ -175,32 +175,49 @@ namespace linux_util {
         }
 
         /**
-         *
-         * @return
+         * Get framebuffer variable screen info
+         * @note Omits obselete, timing  & reserved info
+         * @return string - tabulated info
          */
         std::string variable_info()  {
             vioctl(FBIOGET_VSCREENINFO); // acquire variable info
             std::stringstream ss;
-            ss  << "\nxres\t\t" << vinfo.xres
+            ss  << "\nxres\t\t" << vinfo.xres           // visible resolution
                 << "\nyres\t\t" << vinfo.yres
-                << "\nbuffer addr\t" << std::hex << static_cast<const void *>(screen0)
-                << "\nfinfo.smem_start\t" << finfo.smem_start
-                << "\nscreen memory\t" << std::dec << screensize << " bytes"
-                << "\nbuffer memory\t" << finfo.smem_len << " bytes"
-                << "\nxres_virtual\t" << vinfo.xres_virtual
+                << "\nxres_virtual\t" << vinfo.xres_virtual // virtual resolution
                 << "\nyres_virtual\t" << vinfo.yres_virtual
-                << "\nxoffset\t\t" << vinfo.xoffset
+                << "\nxoffset\t\t" << vinfo.xoffset     // offsets from virtual to visible resolution
                 << "\nyoffset\t\t" << vinfo.yoffset
                 << "\nbits_per_pixel\t" << vinfo.bits_per_pixel
                 << "\nr shift\t\t" << vinfo.red.offset
                 << "\ng shift\t\t" << vinfo.green.offset
                 << "\nb shift\t\t" << vinfo.blue.offset
                 << "\nt shift\t\t" << vinfo.transp.offset
-                << "\ngrayscale\t" << vinfo.grayscale
-                << "\nnonstd\t\t" << vinfo.nonstd
-                << "\nactivate\t" << vinfo.activate
-                << "\nheight\t\t" << vinfo.height << "mm"
-                << "\nwidth\t\t" << vinfo.width << "mm\n";
+                << "\ngrayscale\t" << vinfo.grayscale   // 0 = color, 1 = grayscale, >1 = FOURCC
+                << "\nnonstd\t\t" << vinfo.nonstd       // != 0 non standard pixel format
+                << "\nactivate\t" << vinfo.activate     // e.g FB_ACTIVATE_NOW set values immediately (or vbl), FB_ACTIVATE_FORCE force apply even when no change
+                << "\nheight\t\t" << vinfo.height << "mm"   // height of picture in mm
+                << "\nwidth\t\t" << vinfo.width << "mm\n";  // width of picture in mm
+            return ss.str();
+        }
+
+        std::string fixed_info() {
+            fioctl(FBIOGET_FSCREENINFO);
+            std::stringstream ss;
+            ss  << "\nid\t\t" << std::string(finfo.id); // identification string
+            ss  << "\nmem start\t" << std::hex << finfo.smem_start  // Start of frame buffer mem (physical address)
+                << "\nmem length\t" << std::dec << finfo.smem_len << " bytes"   // Length of frame buffer mem
+                << "\ntype\t\t" << finfo.type
+                << "\naux\t\t"<< finfo.type_aux         // Interleave for interleaved Planes
+                << "\nvisual\t\t"<< finfo.visual
+                << "\nxpanstep\t"<< finfo.xpanstep      // zero if no hardware panning
+                << "\nypanstep\t"<< finfo.ypanstep      // zero if no hardware panning
+                << "\nywarpstep\t"<< finfo.ywrapstep    // zero if no hardware ywrap
+                << "\nline length\t"<< finfo.line_length    // length of a line in bytes
+                << "\nmap IO addr\t"<< std::hex << finfo.mmio_start // Start of Memory Mapped I/O (physical address)
+                << "\nmap length\t"<< std::dec << finfo. mmio_len << " bytes"   // Length of Memory Mapped I/O
+                << "\nacell\t\t"<< finfo.accel		    // Indicate to driver which	specific chip/card we have
+                << "\ncapabilities\t"<< finfo.capabilities;
             return ss.str();
         }
 
@@ -269,7 +286,7 @@ namespace linux_util {
 
         std::string device_path; //TODO remove this and pass to init
         int fbfd{-1}; //frame buffer file descriptor
-        //TODO remove screensize and local to init
+        //TODO remove screensizeb        and local to init
         uint32_t screensize; //visible screen size bytes
         //original screen & 2 virtual screen maps
         uint8_t* screen0{0};
