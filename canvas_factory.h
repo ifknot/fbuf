@@ -22,9 +22,9 @@ namespace linux_util {
     /**
      * Raspberry Pi:
      * HDMI map /dev/fb0 is double buffered
-     * LCD map /dev/fb1 and no double buffering due to hardware limitations
+     * SPI map /dev/fb1 and no double buffering due to hardware limitations
      */
-    enum screen_t {HDMI, LCD};
+    enum screen_t {HDMI, SPI};
 
     /**
      * HDMI 24bit colour canvas - the factory creates a RAII double buffered memory mapping of the linux display screen buffer for simple graphics
