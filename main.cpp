@@ -10,7 +10,7 @@ int main() {
     canvas_t canvas{640, 480};
 
 
-/*
+
     for(size_t i{0}; i < 100; ++i) {
         canvas.rgb(0xff, 0xff, 0xff);
         canvas.rect(160, 120, 320, 240);
@@ -23,7 +23,7 @@ int main() {
         usleep(100000);
     }
     canvas.clear();
-*/
+
 
 
     std::cout << canvas.variable_info() << std::endl;
@@ -33,12 +33,9 @@ int main() {
 
 }
 
-/*
 
- scp /home/jeremy/CLionProjects/fbuf/*.* pi@192.168.1.224:workspace/fbuf/*.*
- scp /home/jeremy/CLionProjects/fbuf/dev/*.* pi@192.168.1.224:workspace/fbuf/dev/*.*
-
- */
+// scp /home/jeremy/CLionProjects/fbuf/*.* pi@192.168.1.224:workspace/fbuf/*.*
+// scp /home/jeremy/CLionProjects/fbuf/dev/*.* pi@192.168.1.224:workspace/fbuf/dev/*.*
 
 /*
  set(CMAKE_CXX_STANDARD 17)
