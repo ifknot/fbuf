@@ -16,6 +16,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "dev/device.h"
+
 
 namespace linux_util {
 
@@ -32,7 +34,7 @@ namespace linux_util {
      * @tparam HDMI
      */
     template<screen_t HDMI>
-    class canvas_factory {
+    class canvas_factory: public device {
 
         const uint32_t DEFAULT_BPP = 32; //24bit colour + 8bit transparency - 16,777,216 colours
 
@@ -49,9 +51,15 @@ namespace linux_util {
          * @param height        desired height as pixels
          * @param device_path   defaults to "/dev/fb0"
          */
-        canvas_factory(size_t width, size_t height, const std::string device_path = "/dev/fb0"): device_path(device_path) {
-            open_buffer();
-            init_screen(width, height);
+        canvas_factory(size_t width, size_t height, const std::string device_path = "/dev/fb0"): device(device_path), width(width), height(height) {
+            initialize();
+        }
+
+        /**
+         * Safely RAII release memory resources
+         */
+        virtual ~canvas_factory()  {
+            deinitialize();
         }
 
         /**
@@ -176,20 +184,12 @@ namespace linux_util {
         }
 
         /**
-         * Safely RAII release memory resources
-         */
-        ~canvas_factory()  {
-            restore_screen();
-            close_buffer();
-        }
-
-        /**
          * Get framebuffer variable screen info
          * @note Omits obselete, timing  & reserved info
          * @return string - tabulated info
          */
         std::string variable_info()  {
-            vioctl(FBIOGET_VSCREENINFO); // acquire variable info
+            xioctl(FBIOGET_VSCREENINFO, &vinfo); // acquire variable info
             std::stringstream ss;
             ss  << "\nxres\t\t" << vinfo.xres           // visible resolution
                 << "\nyres\t\t" << vinfo.yres
@@ -215,7 +215,7 @@ namespace linux_util {
          * @return string - tabulated info
          */
         std::string fixed_info() {
-            fioctl(FBIOGET_FSCREENINFO);
+            xioctl(FBIOGET_FSCREENINFO, &finfo);
             std::stringstream ss;
             ss  << "\nid\t\t" << std::string(finfo.id); // identification string
             ss  << "\nmem start\t" << std::hex << finfo.smem_start  // Start of frame buffer mem (physical address)
@@ -237,38 +237,14 @@ namespace linux_util {
     private:
 
         /**
-         * Acquire the frame buffer file descriptor in read and write mode
-         * @throws std::invalid_argument(strerror(errno))
-         */
-        void open_buffer() {
-            fbfd = open(device_path.c_str(), O_RDWR);
-            if(fbfd != -1) {
-                return;
-            } else {
-                throw std::invalid_argument(strerror(errno));
-            }
-        }
-
-        /**
-         * Release the file descriptor
-         * @throws std::invalid_argument(strerror(errno))
-         */
-        void close_buffer()  {
-            if (close(fbfd) == 0)
-                return;
-            else
-                throw std::invalid_argument(strerror(errno));
-        }
-
-        /**
          * Change the screen resolution, bits per pixel, and set up 2 x virtual screens for the canvas
          * @note canvas uses 2 new buffers and leaves the original screen buffer (screen0) unmolested
          * @param width - visible screen dimensions
          * @param height
          */
-        void init_screen(size_t width, size_t height) {
-            vioctl(FBIOGET_VSCREENINFO); // acquire variable info
-            memcpy(&vinfo_old, &vinfo, sizeof(struct fb_var_screeninfo)); // copy for restore
+        void initialize() override final {
+            xioctl(FBIOGET_VSCREENINFO, &vinfo); // acquire variable info
+            memcpy(&vinfo_old, &vinfo, sizeof(struct fb_var_screeninfo)); // copy current info for restore
             vinfo.xres = width;
             vinfo.yres = height;
             screen1_yoffset = vinfo.yres;
@@ -279,52 +255,32 @@ namespace linux_util {
             vinfo.grayscale = 0; // ensure colour
             vinfo.bits_per_pixel = DEFAULT_BPP;
             vinfo.activate = FB_ACTIVATE_VBL;
-            vioctl(FBIOPUT_VSCREENINFO); // write new vinfo
-            vioctl(FBIOGET_VSCREENINFO); // re-acquire variable info
-            fioctl(FBIOGET_FSCREENINFO); // acquire fixed info
+            xioctl(FBIOPUT_VSCREENINFO, &vinfo); // write new vinfo
+            xioctl(FBIOGET_VSCREENINFO, &vinfo); // re-acquire variable info
+            xioctl(FBIOGET_FSCREENINFO, &finfo); // acquire fixed info
             screensize = vinfo.yres * finfo.line_length; // size of visible area
             //memory map entire frame buffer of 3 x "screens"
             screen0 = static_cast<uint8_t *>(mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
             screen1 = screen0 + screensize; // offset each of the virtual screens
-            screen2 = screen1 + screensize;
+            screen2 = screen1 + screensize;cd ..
+
         }
 
         /**
          * Restore the original screen parameters from ```vinfo_old```
          * @throws std::invalid_argument(strerror(errno))
          */
-        void restore_screen() {
+        void deinitialize() override final {
             if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo_old)) {
-                throw std::invalid_argument(strerror(errno));
+                throw std::invalid_argument(ERR + __func__ + " " + strerror(errno));
             }
             munmap(screen0, finfo.smem_len);
         }
 
-        /**
-         * Variable info helper
-         * @throws std::invalid_argument(strerror(errno))
-         * @param request
-         */
-        inline void vioctl(unsigned long request) {
-            if (ioctl(fbfd, request, &vinfo)) {
-                throw std::invalid_argument(strerror(errno));
-            }
-        }
-
-        /**
-         * Fixed info helper
-         * @throws std::invalid_argument(strerror(errno))
-         * @param request
-         */
-        inline void fioctl(unsigned long request) {
-            if (ioctl(fbfd, request, &finfo)) {
-                throw std::invalid_argument(strerror(errno));
-            }
-        }
-
-        std::string device_path; //TODO remove this and pass to init
+        std::string device_path;
         int fbfd{-1}; //frame buffer file descriptor
-        //TODO remove screensize and local to init
+        size_t width;
+        size_t height;
         uint32_t screensize; //visible screen size bytes
         //original screen & 2 virtual screen maps
         uint8_t* screen0{0};
