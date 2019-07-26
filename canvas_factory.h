@@ -178,8 +178,8 @@ namespace linux_util {
          */
         void swap() {
             vinfo.yoffset = (vinfo.yoffset == screen1_yoffset) ?screen2_yoffset :screen1_yoffset;
-            ioctl(fbfd, FBIO_WAITFORVSYNC, 0);
-            ioctl(fbfd, FBIOPAN_DISPLAY, &vinfo);
+            xioctl(FBIO_WAITFORVSYNC, 0);
+            xioctl(FBIOPAN_DISPLAY, &vinfo);
             std::swap(screen1, screen2);
         }
 
@@ -260,7 +260,7 @@ namespace linux_util {
             xioctl(FBIOGET_FSCREENINFO, &finfo); // acquire fixed info
             screensize = vinfo.yres * finfo.line_length; // size of visible area
             //memory map entire frame buffer of 3 x "screens"
-            screen0 = static_cast<uint8_t *>(mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, (off_t)0));
+            screen0 = static_cast<uint8_t *>(mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd_(), (off_t)0));
             screen1 = screen0 + screensize; // offset each of the virtual screens
             screen2 = screen1 + screensize;
 
@@ -271,14 +271,11 @@ namespace linux_util {
          * @throws std::invalid_argument(strerror(errno))
          */
         void deinitialize() override final {
-            if (ioctl(fbfd, FBIOPUT_VSCREENINFO, &vinfo_old)) {
-                throw std::invalid_argument(ERR + __func__ + " " + strerror(errno));
-            }
+            xioctl(FBIOPUT_VSCREENINFO, &vinfo_old);
             munmap(screen0, finfo.smem_len);
         }
 
         std::string device_path;
-        int fbfd{-1}; //frame buffer file descriptor
         size_t width;
         size_t height;
         uint32_t screensize; //visible screen size bytes
