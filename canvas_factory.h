@@ -260,7 +260,7 @@ namespace linux_util {
             xioctl(FBIOGET_FSCREENINFO, &finfo); // acquire fixed info
             screensize = vinfo.yres * finfo.line_length; // size of visible area
             //memory map entire frame buffer of 3 x "screens"
-            screen0 = static_cast<uint8_t *>(mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd(), (off_t)0));
+            screen0 = static_cast<uint8_t *>(mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fildes(), (off_t)0));
             screen1 = screen0 + screensize; // offset each of the virtual screens
             screen2 = screen1 + screensize;
 
